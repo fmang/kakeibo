@@ -20,10 +20,9 @@ static cv::Mat load_image(const char* path)
 static void detect_horizontal_lines(cv::Mat source)
 {
 	cv::Mat horizontal = source.clone();
-	int horizontal_size = horizontal.cols / 30;
-	cv::Mat horizontal_structure = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(horizontal_size, 1));
-	cv::erode(horizontal, horizontal, horizontal_structure, cv::Point(-1, -1));
-	cv::dilate(horizontal, horizontal, horizontal_structure, cv::Point(-1, -1));
+	cv::Mat horizontal_structure = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(25, 1));
+	cv::erode(horizontal, horizontal, horizontal_structure);
+	cv::dilate(horizontal, horizontal, horizontal_structure);
 	cv::imshow("horizontal", horizontal);
 }
 
