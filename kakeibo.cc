@@ -33,8 +33,6 @@ static double relative_difference(double actual, double expected)
 // Charge l’image passée en argument et la binarise en blanc sur noir.
 static cv::Mat load_image(const char* path)
 {
-	static const int threshold_block_size = 15;
-	static const double threshold_offset = -20;
 	cv::Mat image = cv::imread(path, cv::IMREAD_GRAYSCALE);
 	
 	// S’assure qu’on reçoit une image de résolution similaire à ce qu’on attend.
@@ -44,8 +42,15 @@ static cv::Mat load_image(const char* path)
 		throw std::runtime_error(error);
 	}
 
+	static const int threshold_block_size = 5_mm;
+	static const double threshold_offset = -15;
 	cv::adaptiveThreshold(~image, image, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY,
 	                      threshold_block_size, threshold_offset);
+
+	// Efface les points de bruit.
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(2, 2));
+	cv::morphologyEx(image, image, cv::MORPH_OPEN, element);
+
 	return image;
 }
 
@@ -95,7 +100,7 @@ int main(int argc, char** argv)
 	}
 
 	cv::Mat source = load_image(argv[1]);
-	detect_contours(source);
+	cv::imshow("Threshold", source);
 
 	cv::waitKey(0);
 	return 0;
