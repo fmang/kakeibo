@@ -82,13 +82,21 @@ static void detect_lines(cv::Mat image)
 static void detect_contours(cv::Mat source)
 {
 	std::vector<std::vector<cv::Point>> contours;
-	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours(source, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(source, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-	cv::Mat drawing = cv::Mat::zeros(source.size(), CV_8UC3);
+	cv::Mat drawing;
+	cvtColor(source, drawing, cv::COLOR_GRAY2BGR);
         for (size_t i = 0; i < contours.size(); i++) {
-		cv::Scalar color(std::rand() & 255, std::rand() & 255, std::rand() & 255);
-		cv::drawContours(drawing, contours, i, color, 2, cv::LINE_8, hierarchy, 0);
+		std::vector<cv::Point> poly;
+		cv::approxPolyDP(contours[i], poly, 10_mm, true /* closed */);
+		if (poly.size() == 4) {
+			static const cv::Scalar red(0, 0, 255);
+			cv::drawContours(drawing, contours, i, red, 2);
+			for (cv::Point corner : poly) {
+				static const cv::Scalar yellow(0, 255, 255);
+				cv::circle(drawing, corner, 5, yellow, 2);
+			}
+		}
 	}
 	cv::imshow("Contours", drawing);
 }
@@ -102,6 +110,7 @@ int main(int argc, char** argv)
 
 	cv::Mat source = load_image(argv[1]);
 	cv::imshow("Threshold", source);
+	detect_contours(source);
 
 	cv::waitKey(0);
 	return 0;
