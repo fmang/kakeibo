@@ -2,7 +2,9 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+#include <cstdlib>
 #include <iostream>
+#include <vector>
 
 // Charge l’image passée en argument et la binarise en blanc sur noir.
 static cv::Mat load_image(const char* path)
@@ -26,6 +28,33 @@ static void detect_horizontal_lines(cv::Mat source)
 	cv::imshow("horizontal", horizontal);
 }
 
+// Utilise la détection de lignes de OpenCV. Les lignes tendent à être coupées,
+// donc ce n’est pas idéal.
+static void detect_lines(cv::Mat image)
+{
+	cv::imshow("source", image);
+	std::vector<cv::Vec4f> lines;
+	auto lsd = cv::createLineSegmentDetector(cv::LSD_REFINE_STD);
+	lsd->detect(image, lines);
+	cv::Mat output = cv::Mat::zeros(image.rows, image.cols, image.depth());
+	lsd->drawSegments(output, lines);
+	cv::imshow("LSD", output);
+}
+
+static void detect_contours(cv::Mat source)
+{
+	std::vector<std::vector<cv::Point>> contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(source, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	cv::Mat drawing = cv::Mat::zeros(source.size(), CV_8UC3);
+        for (size_t i = 0; i < contours.size(); i++) {
+		cv::Scalar color(std::rand() & 255, std::rand() & 255, std::rand() & 255);
+		cv::drawContours(drawing, contours, i, color, 2, cv::LINE_8, hierarchy, 0);
+	}
+	cv::imshow("Contours", drawing);
+}
+
 int main(int argc, char** argv)
 {
 	if (argc != 2) {
@@ -34,7 +63,7 @@ int main(int argc, char** argv)
 	}
 
 	cv::Mat source = load_image(argv[1]);
-	detect_horizontal_lines(source);
+	detect_contours(source);
 
 	cv::waitKey(0);
 	return 0;
