@@ -9,4 +9,4 @@ all: kakeibo
 run: kakeibo
 	./kakeibo input.jpg
 
-kakeibo: kakeibo.o
+kakeibo: kakeibo.cc

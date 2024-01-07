@@ -6,12 +6,44 @@
 #include <iostream>
 #include <vector>
 
+// Définit la résolution attendue de l’image. Ça affecte les seuils utilisés
+// pour les fonctions d’approximation.
+static const double dpi = 100;
+
+// Convertit des millimètres en pixels. En définissant les constantes de
+// longueur en millimètres, il sera facile d’ajuster la résolution (dpi) sans
+// revoir tout le code.
+double operator ""_mm(unsigned long long length)
+{
+	static const double mm_per_inch = 25.4;
+	static const double pixels_per_mm = dpi / mm_per_inch;
+	return length * pixels_per_mm;
+}
+
+// On suppose que le format du papier est A5 en portrait.
+static const double paper_width = 148_mm;
+static const double paper_height = 210_mm;
+
+// Renvoie la différence relative entre deux valeurs. 0.10 signifie qu’il y a 10 % d’écart.
+static double relative_difference(double actual, double expected)
+{
+	return std::abs(actual - expected) / expected;
+}
+
 // Charge l’image passée en argument et la binarise en blanc sur noir.
 static cv::Mat load_image(const char* path)
 {
 	static const int threshold_block_size = 15;
 	static const double threshold_offset = -20;
 	cv::Mat image = cv::imread(path, cv::IMREAD_GRAYSCALE);
+	
+	// S’assure qu’on reçoit une image de résolution similaire à ce qu’on attend.
+	if (relative_difference(image.rows, paper_height) > 0.20) {
+		std::cout << image.rows << std::endl;
+		std::string error = "expected image height of " + std::to_string(paper_height) + " (± 20%)";
+		throw std::runtime_error(error);
+	}
+
 	cv::adaptiveThreshold(~image, image, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY,
 	                      threshold_block_size, threshold_offset);
 	return image;
