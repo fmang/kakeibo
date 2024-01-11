@@ -1,19 +1,52 @@
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
-
-#include <iostream>
-#include <vector>
-
-/**
+/*
+ * Reçoit une photo contenant un ou plusieurs tickets de caisse et extrait
+ * chaque ticket individuellement.
+ *
  * Le ticket de caisse de Kinokuniya fait un peut moins de 6 cm. Sur une photo
  * portrait alignant 3 tickets, j’obtient une largeur de 660 px par ticket. Ça
  * fait une résolution d’environ de 11 px / mm, soit 280 dpi. Oublions les
  * unités impériales et partons sur du 10 px / mm. Par conséquent, un ticket
  * après extraction fera 600 px de large. La hauteur après extraction sera
  * calculée pour faire correspondre l’aspect avec le rectangle détecté.
+ *
+ * Obtenir le vrai aspect est un sujet de recherche, mais il est résolu :
+ * https://stackoverflow.com/questions/38285229/calculating-aspect-ratio-of-perspective-transform-destination-image
+ *
+ * Autres références :
+ * - https://pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/
+ * - https://pyimagesearch.com/2014/09/01/build-kick-ass-mobile-document-scanner-just-5-minutes/
  */
+
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+
+#include <cassert>
+#include <iostream>
+#include <vector>
+
+/**
+ * Reçoit un contour contenant 4 points et réordonne les points dans le sens
+ * horaire, en commençant par le coin haut-gauche.
+ */
+struct quad {
+	quad(const std::vector<cv::Point>& corners);
+
+	int height() const;
+	int width() const;
+	double ratio() const;
+
+	std::array<cv::Point, 4> corners;
+};
+
+quad::quad(const std::vector<cv::Point>& corners)
+{
+	assert(points.size() == 4);
+	// TODO:
+	// Calculer le point haut gauche comme celui avec le plus petit x + y.
+	// Calculer le point haut droit comme celui avec le plus petit (ou plus grand) x - y.
+}
 
 int main(int argc, char** argv)
 {
