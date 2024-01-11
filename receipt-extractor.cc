@@ -6,6 +6,15 @@
 #include <iostream>
 #include <vector>
 
+/**
+ * Le ticket de caisse de Kinokuniya fait un peut moins de 6 cm. Sur une photo
+ * portrait alignant 3 tickets, j’obtient une largeur de 660 px par ticket. Ça
+ * fait une résolution d’environ de 11 px / mm, soit 280 dpi. Oublions les
+ * unités impériales et partons sur du 10 px / mm. Par conséquent, un ticket
+ * après extraction fera 600 px de large. La hauteur après extraction sera
+ * calculée pour faire correspondre l’aspect avec le rectangle détecté.
+ */
+
 int main(int argc, char** argv)
 {
 	if (argc != 2) {
@@ -40,7 +49,11 @@ int main(int argc, char** argv)
 		std::vector<cv::Point> poly;
 		cv::approxPolyDP(contours[i], poly, 100, true /* closed */);
 		if (poly.size() == 4) {
-			// TODO: Valider que la taille du contour est suffisamment grande.
+			// TODO:
+			// Valider que la taille du contour est suffisamment grande.
+			// Identifier le coin haut-gauche puis organiser les autres dans le sens horaire.
+			// Calculer la marge comme 5% de la largeur. La couper sur les 4 bords.
+			// Calculer la taille extraite du reçu, puis corriger la perspective.
 			static const cv::Scalar red(0, 0, 255);
 			cv::drawContours(drawing, contours, i, red, 2);
 			for (cv::Point corner : poly) {
