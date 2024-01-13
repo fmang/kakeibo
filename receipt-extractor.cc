@@ -120,14 +120,19 @@ int main(int argc, char** argv)
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
+	// Image sur laquelle on dessine les countours trouvés pour faciliter le debug.
 	cv::Mat drawing;
 	cvtColor(source, drawing, cv::COLOR_GRAY2BGR);
+
+	int extracted_count = 0;
         for (size_t i = 0; i < contours.size(); i++) {
 		// Dessiner uniquement les contours rectangles.
 		std::vector<cv::Point> poly;
 		cv::approxPolyDP(contours[i], poly, 100, true /* closed */);
 		if (poly.size() != 4)
 			continue;
+
+		cv::drawContours(drawing, contours, i, red, 5);
 
 		quad q(poly);
 		int w = q.width();
@@ -139,7 +144,7 @@ int main(int argc, char** argv)
 			continue;
 
 		q.shrink(h * 0.005);
-		cv::polylines(drawing, q.corners, false, red, 10);
+		cv::polylines(drawing, q.corners, false, green, 10);
 		cv::drawMarker(drawing, q.corners[0], yellow, cv::MARKER_CROSS, 40, 10);
 
 		float new_width = 600;
@@ -150,7 +155,10 @@ int main(int argc, char** argv)
 		cv::Mat transform = cv::getPerspectiveTransform(old_rect, new_rect);
 		cv::Mat extracted_receipt;
 		cv::warpPerspective(source, extracted_receipt, transform, cv::Size(new_width, new_height));
-		cv::imshow("Extracted #" + std::to_string(i), extracted_receipt);
+
+		std::string output_file = "extracted-" + std::to_string(++extracted_count) + ".jpg";
+		std::cout << output_file << std::endl;
+		cv::imwrite(output_file, extracted_receipt);
 	}
 
 	cv::imshow("Contours", drawing);
