@@ -37,12 +37,10 @@ static const cv::Scalar yellow(0, 255, 255);
  */
 struct quad {
 	quad(const std::vector<cv::Point>& corners);
+	std::array<cv::Point, 4> corners;
 
 	int height() const;
 	int width() const;
-	double ratio() const;
-
-	std::array<cv::Point, 4> corners;
 };
 
 quad::quad(const std::vector<cv::Point>& points)
@@ -60,6 +58,16 @@ quad::quad(const std::vector<cv::Point>& points)
 	corners[1] = *top_right;
 	corners[2] = *bottom_right;
 	corners[3] = *bottom_left;
+}
+
+int quad::height() const
+{
+	return (cv::norm(corners[0] - corners[3]) + cv::norm(corners[1] - corners[2])) / 2;
+}
+
+int quad::width() const
+{
+	return (cv::norm(corners[0] - corners[1]) + cv::norm(corners[2] - corners[3])) / 2;
 }
 
 int main(int argc, char** argv)
@@ -95,16 +103,24 @@ int main(int argc, char** argv)
 		// Dessiner uniquement les contours rectangles.
 		std::vector<cv::Point> poly;
 		cv::approxPolyDP(contours[i], poly, 100, true /* closed */);
-		if (poly.size() == 4) {
-			quad q(poly);
-			// TODO:
-			// Valider que la taille du contour est suffisamment grande.
-			// Identifier le coin haut-gauche puis organiser les autres dans le sens horaire.
-			// Calculer la marge comme 5% de la largeur. La couper sur les 4 bords.
-			// Calculer la taille extraite du reçu, puis corriger la perspective.
-			cv::polylines(drawing, q.corners, false, red, 10);
-			cv::drawMarker(drawing, q.corners[0], yellow, cv::MARKER_CROSS, 40, 10);
-		}
+		if (poly.size() != 4)
+			continue;
+
+		quad q(poly);
+		int w = q.width();
+		int h = q.height();
+		if (w < 400 || h < 300)
+			continue; // Trop petit.
+		if (w > h * 0.8)
+			// Trop large par rapport à sa hauteur.
+			continue;
+
+		cv::polylines(drawing, q.corners, false, red, 10);
+		cv::drawMarker(drawing, q.corners[0], yellow, cv::MARKER_CROSS, 40, 10);
+
+		// TODO:
+		// Calculer la marge comme 5% de la largeur. La couper sur les 4 bords.
+		// Calculer la taille extraite du reçu, puis corriger la perspective.
 	}
 	cv::imshow("Contours", drawing);
 
