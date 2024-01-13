@@ -112,10 +112,10 @@ int main(int argc, char** argv)
 	// blancs sur fond foncé.
 	cv::Canny(image, image, 75, 200);
 
-	// Diltation pour que les bords fragiles se solidifient.
+	// Dilatation pour que les bords fragiles se solidifient.
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 	cv::dilate(image, image, element);
-	cv::imshow("Dilated", image);
+	//cv::imshow("Dilated", image);
 
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -142,11 +142,18 @@ int main(int argc, char** argv)
 		cv::polylines(drawing, q.corners, false, red, 10);
 		cv::drawMarker(drawing, q.corners[0], yellow, cv::MARKER_CROSS, 40, 10);
 
-		// TODO:
-		// Corriger la perspective.
+		float new_width = 600;
+		float new_height = h * new_width / w;
+		std::vector<cv::Point2f> old_rect;
+		std::transform(q.corners.begin(), q.corners.end(), std::back_inserter(old_rect), [] (cv::Point p) { return p; });
+		std::vector<cv::Point2f> new_rect = { {0, 0}, {new_width, 0}, {new_width, new_height}, {0, new_height} };
+		cv::Mat transform = cv::getPerspectiveTransform(old_rect, new_rect);
+		cv::Mat extracted_receipt;
+		cv::warpPerspective(source, extracted_receipt, transform, cv::Size(new_width, new_height));
+		cv::imshow("Extracted #" + std::to_string(i), extracted_receipt);
 	}
-	cv::imshow("Contours", drawing);
 
+	cv::imshow("Contours", drawing);
 	cv::waitKey(0);
 	return 0;
 }
