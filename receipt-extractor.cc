@@ -41,6 +41,7 @@ struct quad {
 
 	int height() const;
 	int width() const;
+	void shrink(int border);
 };
 
 quad::quad(const std::vector<cv::Point>& points)
@@ -68,6 +69,28 @@ int quad::height() const
 int quad::width() const
 {
 	return (cv::norm(corners[0] - corners[1]) + cv::norm(corners[2] - corners[3])) / 2;
+}
+
+void shrink_segment(cv::Point& a, cv::Point& b, int border)
+{
+	cv::Point m = (a + b) / 2;
+	double distance = cv::norm(a - b);
+	double ratio = (distance - 2 * border) / distance;
+	a = m + (a - m) * ratio;
+	b = m + (b - m) * ratio;
+}
+
+/**
+ * Réduit le rectangle en retranchant un nombre de pixel de chaque côté. Un
+ * rectangle de 500 pixels de large avec border = 50 px fera 400 px de large à
+ * la fin. De même pour la hauteur.
+ */
+void quad::shrink(int border)
+{
+	shrink_segment(corners[0], corners[1], border);
+	shrink_segment(corners[2], corners[3], border);
+	shrink_segment(corners[0], corners[3], border);
+	shrink_segment(corners[1], corners[2], border);
 }
 
 int main(int argc, char** argv)
@@ -115,12 +138,12 @@ int main(int argc, char** argv)
 			// Trop large par rapport à sa hauteur.
 			continue;
 
+		q.shrink(h * 0.005);
 		cv::polylines(drawing, q.corners, false, red, 10);
 		cv::drawMarker(drawing, q.corners[0], yellow, cv::MARKER_CROSS, 40, 10);
 
 		// TODO:
-		// Calculer la marge comme 5% de la largeur. La couper sur les 4 bords.
-		// Calculer la taille extraite du reçu, puis corriger la perspective.
+		// Corriger la perspective.
 	}
 	cv::imshow("Contours", drawing);
 
