@@ -22,9 +22,14 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <vector>
+
+static const cv::Scalar red(0, 0, 255);
+static const cv::Scalar green(0, 255, 0);
+static const cv::Scalar yellow(0, 255, 255);
 
 /**
  * Reçoit un contour contenant 4 points et réordonne les points dans le sens
@@ -40,12 +45,21 @@ struct quad {
 	std::array<cv::Point, 4> corners;
 };
 
-quad::quad(const std::vector<cv::Point>& corners)
+quad::quad(const std::vector<cv::Point>& points)
 {
 	assert(points.size() == 4);
-	// TODO:
-	// Calculer le point haut gauche comme celui avec le plus petit x + y.
-	// Calculer le point haut droit comme celui avec le plus petit (ou plus grand) x - y.
+
+	auto [top_left, bottom_right] = std::minmax_element(
+		points.begin(), points.end(),
+		[](cv::Point a, cv::Point b) { return a.x + a.y < b.x + b.y; });
+	auto [bottom_left, top_right] = std::minmax_element(
+		points.begin(), points.end(),
+		[](cv::Point a, cv::Point b) { return a.x - a.y < b.x - b.y; });
+
+	corners[0] = *top_left;
+	corners[1] = *top_right;
+	corners[2] = *bottom_right;
+	corners[3] = *bottom_left;
 }
 
 int main(int argc, char** argv)
@@ -82,17 +96,14 @@ int main(int argc, char** argv)
 		std::vector<cv::Point> poly;
 		cv::approxPolyDP(contours[i], poly, 100, true /* closed */);
 		if (poly.size() == 4) {
+			quad q(poly);
 			// TODO:
 			// Valider que la taille du contour est suffisamment grande.
 			// Identifier le coin haut-gauche puis organiser les autres dans le sens horaire.
 			// Calculer la marge comme 5% de la largeur. La couper sur les 4 bords.
 			// Calculer la taille extraite du reçu, puis corriger la perspective.
-			static const cv::Scalar red(0, 0, 255);
-			cv::drawContours(drawing, contours, i, red, 2);
-			for (cv::Point corner : poly) {
-				static const cv::Scalar yellow(0, 255, 255);
-				cv::circle(drawing, corner, 5, yellow, 2);
-			}
+			cv::polylines(drawing, q.corners, false, red, 10);
+			cv::drawMarker(drawing, q.corners[0], yellow, cv::MARKER_CROSS, 40, 10);
 		}
 	}
 	cv::imshow("Contours", drawing);
