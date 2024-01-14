@@ -101,12 +101,15 @@ int main(int argc, char** argv)
 	}
 
 	const char* image_path = argv[1];
-	cv::Mat source = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
+	cv::Mat source = cv::imread(image_path, cv::IMREAD_COLOR);
+
+	// Grise l’image avant de travailler sur les contours.
+	cv::Mat image;
+	cv::cvtColor(source, image, cv::COLOR_BGR2GRAY);
 
 	// Floute les détails pour que le bruit du fond ne génère pas de bords.
 	// Comme nos tables sont en bois, le motif du bois casse tout.
-	cv::Mat image;
-	cv::GaussianBlur(source, image, cv::Size(5, 5), 0);
+	cv::GaussianBlur(image, image, cv::Size(5, 5), 0);
 
 	// Détection des bords avec un fort seuil. On s’attend à des tickets
 	// blancs sur fond foncé.
@@ -121,8 +124,7 @@ int main(int argc, char** argv)
 	cv::findContours(image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	// Image sur laquelle on dessine les countours trouvés pour faciliter le debug.
-	cv::Mat drawing;
-	cvtColor(source, drawing, cv::COLOR_GRAY2BGR);
+	cv::Mat drawing = source.clone();
 
 	int extracted_count = 0;
         for (size_t i = 0; i < contours.size(); i++) {
