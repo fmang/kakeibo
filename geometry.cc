@@ -1,5 +1,7 @@
 #include "kakeibo.h"
 
+#include <cassert>
+
 quad::quad(const std::vector<cv::Point>& points)
 {
 	assert(points.size() == 4);

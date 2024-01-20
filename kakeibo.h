@@ -17,3 +17,10 @@ struct quad {
 	int width() const;
 	void shrink(int border);
 };
+
+/**
+ * Reçoit une image et renvoie la liste des reçus extraits. Chaque reçu est
+ * recadré pour rentrer dans un rectangle droit de 600 px de large pour une
+ * résolution d’environ 10 px / mm.
+ */
+std::vector<cv::Mat> extract_receipts(cv::Mat photo);

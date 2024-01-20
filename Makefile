@@ -5,4 +5,4 @@ LDLIBS = -L/opt/local/lib/opencv4/ -lopencv_highgui.4.8.0 -lopencv_imgcodecs.4.8
 
 all: kakeibo
 
-kakeibo: kakeibo.o geometry.o
+kakeibo: kakeibo.o geometry.o extractor.o
