@@ -1,4 +1,5 @@
 *.o
 
-/kakeibo
+/extracted
 /photos
+/src/kakeibo
