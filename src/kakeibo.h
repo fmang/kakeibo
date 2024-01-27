@@ -7,6 +7,18 @@
 #include <vector>
 
 /**
+ * Mode d’opération :
+ * - c : Découpe les reçus présents sur une photo.
+ * - x : Extrait les fragments intéressantes d’un reçu.
+ */
+extern char mode;
+
+/**
+ * Si activé via --debug, affiche visuellement les données traitées.
+ */
+extern bool debug;
+
+/**
  * Reçoit un contour contenant 4 points et réordonne les points dans le sens
  * horaire, en commençant par le coin haut-gauche.
  */
@@ -31,3 +43,8 @@ std::vector<cv::Mat> extract_receipts(cv::Mat photo);
  * fichier de sortie.
  */
 std::string save_extract(cv::Mat image);
+
+/**
+ * Extrait les informations d’un reçu.
+ */
+void scan_receipt(cv::Mat photo);
