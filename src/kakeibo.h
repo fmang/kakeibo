@@ -3,6 +3,7 @@
 #include <opencv2/core.hpp>
 
 #include <array>
+#include <string>
 #include <vector>
 
 /**
@@ -24,3 +25,9 @@ struct quad {
  * résolution d’environ 10 px / mm.
  */
 std::vector<cv::Mat> extract_receipts(cv::Mat photo);
+
+/**
+ * Enregistre l’image dans un fichier extracted/123.jpg. Renvoie le nom du
+ * fichier de sortie.
+ */
+std::string save_extract(cv::Mat image);

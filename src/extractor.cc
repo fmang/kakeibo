@@ -19,9 +19,11 @@
 
 #include "kakeibo.h"
 
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
 #include <algorithm>
+#include <filesystem>
 
 std::vector<cv::Mat> extract_receipts(cv::Mat source)
 {
@@ -82,4 +84,20 @@ std::vector<cv::Mat> extract_receipts(cv::Mat source)
 	}
 
 	return receipts;
+}
+
+std::string save_extract(cv::Mat image)
+{
+	static bool extracted_directory_created = false;
+	if (!extracted_directory_created) {
+		std::filesystem::create_directories("extracted");
+		extracted_directory_created = true;
+	}
+
+	static int extracted_count = 0;
+	char buffer[32];
+	std::snprintf(buffer, 32, "extracted/%03d.jpg", ++extracted_count);
+	std::string output_file = buffer;
+	cv::imwrite(output_file, image);
+	return output_file;
 }
