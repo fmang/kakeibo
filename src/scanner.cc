@@ -8,6 +8,21 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+/**
+ * Reçoit un fragment d’image contenant par exemple « 合計 », et extrait chaque
+ * lettre individuelle. On suppose que le fragment contient exactement 2
+ * lettres.
+ */
+static void extract_letters(cv::Mat fragment)
+{
+	static bool show = debug;
+	if (show) {
+		cv::imshow("Fragment", fragment);
+		int key = cv::waitKey(0);
+		show = (key == 32); // Espace.
+	}
+}
+
 void scan_receipt(cv::Mat source)
 {
 	// Extrait le rouge pour rendre les tampons moins visibles. Les tickets
@@ -28,17 +43,19 @@ void scan_receipt(cv::Mat source)
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(red, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
-		cv::Scalar color(0, 255, 0);
 		cv::Rect box = cv::boundingRect(contour);
 		double aspect = static_cast<double>(box.width) / box.height;
-		if (box.width < 40 || box.height < 20 ||
-		    box.width > 150 || box.height > 100 ||
-		    aspect < 2 || aspect > 6 ||
-		    box.x + box.width > red.cols / 2)
-			color = cv::Scalar(0, 0, 255);
+		bool promising =
+			box.width > 40 && box.height > 20 &&
+			box.width < 150 && box.height < 100 &&
+			aspect > 2 && aspect < 6 &&
+			box.x + box.width < red.cols / 2;
+
+		if (promising)
+			extract_letters(source(box));
 
 		if (debug)
-			cv::rectangle(drawing, box.tl(), box.br(), color, 2);
+			cv::rectangle(drawing, box.tl(), box.br(), promising ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255), 2);
 	}
 
 	if (debug) {
