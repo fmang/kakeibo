@@ -9,18 +9,53 @@
 #include <opencv2/highgui.hpp>
 
 /**
+ * Supprime tous les pixels noirs autour d’une image.
+ */
+static cv::Mat trim(cv::Mat image)
+{
+	cv::Mat binary;
+	cv::cvtColor(image, binary, cv::COLOR_BGR2GRAY);
+	cv::threshold(binary, binary, 128, 255, cv::THRESH_BINARY);
+	cv::bitwise_not(binary, binary);
+
+	// Efface les pixels de bruit.
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
+	cv::morphologyEx(binary, binary, cv::MORPH_OPEN, element);
+
+	std::vector<cv::Point> whites;
+	cv::findNonZero(binary, whites);
+	cv::Rect box = cv::boundingRect(whites);
+	return image(box);
+}
+
+static void extract_letter(cv::Mat fragment)
+{
+	cv::Mat letter = trim(fragment);
+	if (letter.empty())
+		return;
+
+	static bool show = debug;
+	if (show) {
+		cv::imshow("Letter", letter);
+		int key = cv::waitKey(0);
+		show = (key == 32); // Espace.
+	}
+
+	save_extract(letter);
+}
+
+/**
  * Reçoit un fragment d’image contenant par exemple « 合計 », et extrait chaque
  * lettre individuelle. On suppose que le fragment contient exactement 2
  * lettres.
  */
 static void extract_letters(cv::Mat fragment)
 {
-	static bool show = debug;
-	if (show) {
-		cv::imshow("Fragment", fragment);
-		int key = cv::waitKey(0);
-		show = (key == 32); // Espace.
-	}
+	int half = fragment.cols / 2;
+	cv::Mat left = fragment(cv::Range::all(), cv::Range(0, half));
+	cv::Mat right = fragment(cv::Range::all(), cv::Range(half, fragment.cols));
+	extract_letter(left);
+	extract_letter(right);
 }
 
 void scan_receipt(cv::Mat source)
