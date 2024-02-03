@@ -9,7 +9,6 @@
 #include "kakeibo.h"
 
 #include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
 
 /**
  * Supprime tous les pixels noirs autour d’une image.
@@ -37,14 +36,7 @@ static void extract_letter(cv::Mat fragment)
 	if (letter.empty())
 		return;
 
-	static bool show = debug;
-	if (show) {
-		cv::imshow("Letter", letter);
-		int key = cv::waitKey(0);
-		show = (key == 32); // Espace.
-	}
-
-	save(letter);
+	show("Letter", letter);
 }
 
 /**
@@ -75,6 +67,7 @@ void scan_receipt(cv::Mat source)
 	// mot, plutôt qu’un par lettre. Ça permet aussi d’unifier les kanjis.
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(20, 1));
 	cv::dilate(red, red, element);
+	show("Red", red);
 
 	cv::Mat drawing = debug ? source.clone() : cv::Mat();
 
@@ -95,10 +88,6 @@ void scan_receipt(cv::Mat source)
 		if (debug)
 			cv::rectangle(drawing, box.tl(), box.br(), promising ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255), 2);
 	}
-
-	if (debug) {
-		cv::imshow("Red", red);
-		cv::imshow("Countours", drawing);
-		cv::waitKey(0);
-	}
+	if (debug)
+		show("Countours", drawing);
 }

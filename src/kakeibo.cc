@@ -1,11 +1,13 @@
 #include "kakeibo.h"
 
+#include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <getopt.h>
+#include <set>
 
 bool debug = false;
 char mode = 0;
@@ -90,4 +92,22 @@ std::string save(cv::Mat image)
 	std::string output_file = buffer;
 	cv::imwrite(output_file, image);
 	return output_file;
+}
+
+void show(const std::string& name, cv::Mat image)
+{
+	if (!debug)
+		return;
+
+	static std::set<std::string> skip;
+	if (skip.contains(name))
+		return;
+
+	cv::imshow("Kakeibo", image);
+	int key = cv::waitKey(0);
+	switch (key) {
+	case ' ': break;
+	case 's': save(image); break;
+	default: skip.insert(name);
+	}
 }

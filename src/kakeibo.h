@@ -4,6 +4,7 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 #include <vector>
 
 /**
@@ -43,6 +44,17 @@ std::vector<cv::Mat> cut_receipts(cv::Mat photo);
  * fichier de sortie.
  */
 std::string save(cv::Mat image);
+
+/**
+ * Ouvre une fenêtre affichant l’image. Au plus une image à la fois est
+ * affichée. Attend que l’utilisateur appuie sur une touche pour passer à
+ * l’image suivante. Si l’utilisateur appuie sur une autre touche qu’Espace,
+ * toutes les demandes d’affichage successives de la même image seront
+ * ignorées.
+ *
+ * Nécessite --debug pour être activée.
+ */
+void show(const std::string& name, cv::Mat image);
 
 /**
  * Extrait les informations d’un reçu.
