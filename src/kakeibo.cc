@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
 #include <getopt.h>
 
 bool debug = false;
@@ -55,8 +56,8 @@ int main(int argc, char** argv)
 		for (int argi = optind; argi < argc; ++argi) {
 			const char* image_path = argv[argi];
 			cv::Mat source = cv::imread(image_path, cv::IMREAD_COLOR);
-			for (auto receipt : extract_receipts(source))
-				std::puts(save_extract(receipt).c_str());
+			for (auto receipt : cut_receipts(source))
+				std::puts(save(receipt).c_str());
 		}
 		break;
 
@@ -73,4 +74,20 @@ int main(int argc, char** argv)
 	}
 
 	return 0;
+}
+
+std::string save(cv::Mat image)
+{
+	static bool extracted_directory_created = false;
+	if (!extracted_directory_created) {
+		std::filesystem::create_directories("extracted");
+		extracted_directory_created = true;
+	}
+
+	static int extracted_count = 0;
+	char buffer[32];
+	std::snprintf(buffer, 32, "extracted/%03d.jpg", ++extracted_count);
+	std::string output_file = buffer;
+	cv::imwrite(output_file, image);
+	return output_file;
 }

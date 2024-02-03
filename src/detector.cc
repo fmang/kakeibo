@@ -44,7 +44,7 @@ static void extract_letter(cv::Mat fragment)
 		show = (key == 32); // Espace.
 	}
 
-	save_extract(letter);
+	save(letter);
 }
 
 /**

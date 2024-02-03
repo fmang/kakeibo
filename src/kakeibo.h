@@ -36,13 +36,13 @@ struct quad {
  * recadré pour rentrer dans un rectangle droit de 600 px de large pour une
  * résolution d’environ 10 px / mm.
  */
-std::vector<cv::Mat> extract_receipts(cv::Mat photo);
+std::vector<cv::Mat> cut_receipts(cv::Mat photo);
 
 /**
  * Enregistre l’image dans un fichier extracted/123.jpg. Renvoie le nom du
  * fichier de sortie.
  */
-std::string save_extract(cv::Mat image);
+std::string save(cv::Mat image);
 
 /**
  * Extrait les informations d’un reçu.
