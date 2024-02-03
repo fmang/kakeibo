@@ -1,5 +1,8 @@
 /*
- * Reçoit la photo d’un ticket de caisse en entrée et extrait la date et le montant payé.
+ * Reçoit la photo d’un ticket de caisse en entrée et détecte ses éléments :
+ * zones de texte, ligne du total, montant, ainsi que la date à travers les
+ * chiffres ou encore depuis le code barre.
+ *
  * On suppose une résolution de 10 px / mm.
  */
 
