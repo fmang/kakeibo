@@ -20,10 +20,6 @@ static cv::Mat trim(cv::Mat image)
 	cv::threshold(binary, binary, 128, 255, cv::THRESH_BINARY);
 	cv::bitwise_not(binary, binary);
 
-	// Efface les pixels de bruit.
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
-	cv::morphologyEx(binary, binary, cv::MORPH_OPEN, element);
-
 	std::vector<cv::Point> whites;
 	cv::findNonZero(binary, whites);
 	cv::Rect box = cv::boundingRect(whites);
