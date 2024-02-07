@@ -12,7 +12,8 @@
 
 /**
  * Représente une ligne de texte. box est la bounding box sur l’image d’entrée.
- * letters est une liste de bounding boxes pour chaque lettre de la ligne.
+ * letters est une liste de bounding boxes pour chaque lettre de la ligne,
+ * relatives à l’image source.
  */
 struct text_line {
 	cv::Rect box;
@@ -104,6 +105,58 @@ static void show_text_lines(cv::Mat source, const std::vector<text_line> lines)
 	show("Text lines", drawing);
 }
 
+/**
+ * Ajoute une partie droite (extra) à une ligne de base.
+ * Si extra est à droite, les deux lignes sont inversées sur place.
+ * Le résultat est stocké dans base.
+ */
+void merge_text_lines(text_line& base, text_line& extra)
+{
+	if (base.box.x > extra.box.x)
+		std::swap(base, extra);
+	base.box |= extra.box;
+	base.letters.insert(base.letters.end(), extra.letters.begin(), extra.letters.end());
+}
+
+/**
+ * Renvoie le nombre de pixels de superposition sur la projection horizontale
+ * des deux lignes. S’il est négatif, il n’y a aucune superposition.
+ */
+int vertical_overlap(const text_line& a, const text_line& b)
+{
+	int top = std::max(a.box.y, b.box.y);
+	int bottom = std::min(a.box.y + a.box.height, b.box.y + b.box.height);
+	return bottom - top;
+}
+
+/**
+ * Fusionne les lignes alignées horizontalement.
+ */
+void compact_lines(std::vector<text_line>& lines)
+{
+	// On veut au moins un élément pour démarrer l’accumulation.
+	if (lines.empty())
+		return;
+
+	// Trie sur y, de haut en bas.
+	auto above = [](const text_line& a, const text_line& b) {
+		return a.box.y < b.box.y;
+	};
+	std::sort(lines.begin(), lines.end(), above);
+
+	std::vector<text_line> compacted_lines;
+	auto it = lines.begin();
+	text_line* accumulator = &compacted_lines.emplace_back(*it++);
+	for (; it != lines.end(); ++it) {
+		int overlap = vertical_overlap(*accumulator, *it);
+		if (overlap > accumulator->box.height / 2 && overlap > it->box.height / 2)
+			merge_text_lines(*accumulator, *it);
+		else
+			accumulator = &compacted_lines.emplace_back(*it);
+	}
+	lines = std::move(compacted_lines);
+}
+
 void scan_receipt(cv::Mat source)
 {
 	// Extrait le rouge pour rendre les tampons moins visibles. Les tickets
@@ -114,6 +167,7 @@ void scan_receipt(cv::Mat source)
 	cv::adaptiveThreshold(binary, binary, 255, cv::THRESH_BINARY, cv::ADAPTIVE_THRESH_MEAN_C, 75, -50);
 
 	std::vector<text_line> lines = extract_text_lines(binary);
+	compact_lines(lines);
 	if (debug)
 		show_text_lines(source, lines);
 }
