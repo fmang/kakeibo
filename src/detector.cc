@@ -25,19 +25,31 @@ struct text_line {
  */
 static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
 {
-	cv::Mat extract = binary(line_box);
+	cv::Size dilatation { /* horizontal */ 1, /* vertical */ 19 };
+	cv::Mat extract = cv::Mat(
+		line_box.height + 2 * dilatation.height,
+		line_box.width + 2 * dilatation.width,
+		binary.type()
+	);
+
+	cv::copyMakeBorder(
+		binary(line_box), extract,
+		/* top */ dilatation.height, /* bottom */ dilatation.height,
+		/* left */ dilatation.width, /* right */ dilatation.width,
+		cv::BORDER_CONSTANT | cv::BORDER_ISOLATED
+	);
 
 	// La dilatation verticale permet de rassembler les contours d’une même lettre.
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(1, 5));
-	cv::dilate(extract, extract, element);
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(dilatation.width, dilatation.height));
+	cv::morphologyEx(extract, extract, cv::MORPH_CLOSE, element);
 
 	std::vector<cv::Rect> letters;
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(extract, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect letter = cv::boundingRect(contour);
-		letter.x += line_box.x;
-		letter.y += line_box.y;
+		letter.x += line_box.x - dilatation.width;
+		letter.y += line_box.y - dilatation.height;
 		letters.push_back(letter);
 	}
 
@@ -54,8 +66,8 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 {
 	// La dilatation horizontale permet de rassembler les lignes dans un même contour.
 	cv::Mat dilated;
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(20, 1));
-	cv::dilate(binary, dilated, element);
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(19, 1));
+	cv::morphologyEx(binary, dilated, cv::MORPH_CLOSE, element);
 
 	std::vector<text_line> lines;
 	std::vector<std::vector<cv::Point>> contours;
