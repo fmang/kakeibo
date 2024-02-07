@@ -49,7 +49,7 @@ static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
 	cv::findContours(extract, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect letter = cv::boundingRect(contour);
-		if (letter.area() < 25) // Ignore le bruit.
+		if (letter.area() < 50) // Ignore le bruit.
 			continue;
 
 		letter.x += line_box.x - dilatation.width;
@@ -82,7 +82,7 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 	cv::findContours(dilated, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect box = cv::boundingRect(contour);
-		if (box.area() < 25) // Ignore le bruit.
+		if (box.area() < 50) // Ignore le bruit.
 			continue;
 		lines.push_back(extract_text_line(binary, box));
 	}
@@ -91,16 +91,25 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 }
 
 /**
- * Affiche pour le debug l’image source avec les lignes encadrées en rouge et
- * les lettre en bleu.
+ * Affiche pour le debug l’image source avec les lettres encadrées. Les lettres
+ * d’une même ligne seront de la même couleur.
  */
 static void show_text_lines(cv::Mat source, const std::vector<text_line> lines)
 {
+	static std::vector<cv::Scalar> colors = {
+		cv::Scalar(255, 0, 0),
+		cv::Scalar(0, 255, 0),
+		cv::Scalar(0, 0, 255),
+		cv::Scalar(128, 128, 0),
+		cv::Scalar(128, 0, 128),
+		cv::Scalar(0, 128, 128),
+	};
+	int color_index = 0;
 	cv::Mat drawing = source.clone();
 	for (const text_line& line : lines) {
-		cv::rectangle(drawing, line.box.tl(), line.box.br(), cv::Scalar(0, 0, 255), 2);
+		cv::Scalar color = colors[++color_index % colors.size()];
 		for (const cv::Rect& letter : line.letters)
-			cv::rectangle(drawing, letter.tl(), letter.br(), cv::Scalar(255, 0, 0), 1);
+			cv::rectangle(drawing, letter.tl(), letter.br(), color, 1);
 	}
 	show("Text lines", drawing);
 }
