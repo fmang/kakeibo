@@ -48,12 +48,19 @@ static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
 	cv::findContours(extract, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect letter = cv::boundingRect(contour);
+		if (letter.area() < 25) // Ignore le bruit.
+			continue;
+
 		letter.x += line_box.x - dilatation.width;
 		letter.y += line_box.y - dilatation.height;
 		letters.push_back(letter);
 	}
 
-	// TODO: Trier les lignes par x.
+	// Trier les lettres de gauche à droite.
+	auto left_of = [](const cv::Rect& a, const cv::Rect& b) {
+		return a.x < b.x;
+	};
+	std::sort(letters.begin(), letters.end(), left_of);
 
 	return text_line { line_box, letters };
 }
@@ -74,6 +81,8 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 	cv::findContours(dilated, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect box = cv::boundingRect(contour);
+		if (box.area() < 25) // Ignore le bruit.
+			continue;
 		lines.push_back(extract_text_line(binary, box));
 	}
 
@@ -88,9 +97,9 @@ static void show_text_lines(cv::Mat source, const std::vector<text_line> lines)
 {
 	cv::Mat drawing = source.clone();
 	for (const text_line& line : lines) {
+		cv::rectangle(drawing, line.box.tl(), line.box.br(), cv::Scalar(0, 0, 255), 2);
 		for (const cv::Rect& letter : line.letters)
 			cv::rectangle(drawing, letter.tl(), letter.br(), cv::Scalar(255, 0, 0), 1);
-		cv::rectangle(drawing, line.box.tl(), line.box.br(), cv::Scalar(0, 0, 255), 2);
 	}
 	show("Text lines", drawing);
 }
