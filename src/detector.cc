@@ -119,7 +119,7 @@ static void show_text_lines(cv::Mat source, const std::vector<text_line> lines)
  * Si extra est à droite, les deux lignes sont inversées sur place.
  * Le résultat est stocké dans base.
  */
-void merge_text_lines(text_line& base, text_line& extra)
+static void merge_text_lines(text_line& base, text_line& extra)
 {
 	if (base.box.x > extra.box.x)
 		std::swap(base, extra);
@@ -131,7 +131,7 @@ void merge_text_lines(text_line& base, text_line& extra)
  * Renvoie le nombre de pixels de superposition sur la projection horizontale
  * des deux lignes. S’il est négatif, il n’y a aucune superposition.
  */
-int vertical_overlap(const text_line& a, const text_line& b)
+static int vertical_overlap(const text_line& a, const text_line& b)
 {
 	int top = std::max(a.box.y, b.box.y);
 	int bottom = std::min(a.box.y + a.box.height, b.box.y + b.box.height);
@@ -141,7 +141,7 @@ int vertical_overlap(const text_line& a, const text_line& b)
 /**
  * Fusionne les lignes alignées horizontalement.
  */
-void compact_lines(std::vector<text_line>& lines)
+static void compact_lines(std::vector<text_line>& lines)
 {
 	// On veut au moins un élément pour démarrer l’accumulation.
 	if (lines.empty())
@@ -166,17 +166,31 @@ void compact_lines(std::vector<text_line>& lines)
 	lines = std::move(compacted_lines);
 }
 
-void scan_receipt(cv::Mat source)
+static cv::Mat binarize(cv::Mat color)
 {
 	// Extrait le rouge pour rendre les tampons moins visibles. Les tickets
 	// sont monochromes, donc tous les canaux sont plus ou moins égaux.
 	cv::Mat binary;
-	cv::extractChannel(source, binary, 2); // Canal rouge.
+	cv::extractChannel(color, binary, 2); // Canal rouge.
 	cv::bitwise_not(binary, binary); // Blanc sur noir.
 	cv::adaptiveThreshold(binary, binary, 255, cv::THRESH_BINARY, cv::ADAPTIVE_THRESH_MEAN_C, 75, -50);
+	return binary;
+}
 
+void scan_receipt(cv::Mat source)
+{
+	cv::Mat binary = binarize(source);
 	std::vector<text_line> lines = extract_text_lines(binary);
 	compact_lines(lines);
 	if (debug)
 		show_text_lines(source, lines);
+}
+
+void extract_samples(cv::Mat source)
+{
+	cv::Mat binary = binarize(source);
+	for (auto& line : extract_text_lines(binary)) {
+		for (auto& letter : line.letters)
+			save(binary(letter));
+	}
 }

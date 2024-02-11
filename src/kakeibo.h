@@ -60,3 +60,10 @@ void show(const std::string& name, cv::Mat image);
  * Extrait les informations d’un reçu.
  */
 void scan_receipt(cv::Mat photo);
+
+/**
+ * Extrait dans pleins de petits fichiers chaque lettre contenu dans le reçu.
+ * Ces images sont destinées à servir d’échantillons pour le moteur de
+ * reconnaissance de glyphes.
+ */
+void extract_samples(cv::Mat photo);

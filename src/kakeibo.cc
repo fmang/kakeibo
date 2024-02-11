@@ -14,11 +14,13 @@ char mode = 0;
 
 static const char* usage = \
 	"Usage: kakeibo --cut FICHIER…\n"
+	"       kakeibo --scan FICHIER…\n"
 	"       kakeibo --extract FICHIER…\n"
 ;
 
 static struct option options[] = {
 	{ "cut", no_argument, 0, 'c' },
+	{ "scan", no_argument, 0, 's' },
 	{ "extract", no_argument, 0, 'x' },
 	{ "debug", no_argument, 0, 'd' },
 	{}
@@ -63,11 +65,19 @@ int main(int argc, char** argv)
 		}
 		break;
 
-	case 'x':
+	case 's':
 		for (int argi = optind; argi < argc; ++argi) {
 			const char* image_path = argv[argi];
 			cv::Mat source = cv::imread(image_path, cv::IMREAD_COLOR);
 			scan_receipt(source);
+		}
+		break;
+
+	case 'x':
+		for (int argi = optind; argi < argc; ++argi) {
+			const char* image_path = argv[argi];
+			cv::Mat source = cv::imread(image_path, cv::IMREAD_COLOR);
+			extract_samples(source);
 		}
 		break;
 
@@ -88,7 +98,7 @@ std::string save(cv::Mat image)
 
 	static int extracted_count = 0;
 	char buffer[32];
-	std::snprintf(buffer, 32, "extracted/%03d.jpg", ++extracted_count);
+	std::snprintf(buffer, 32, "extracted/%04d.jpg", ++extracted_count);
 	std::string output_file = buffer;
 	cv::imwrite(output_file, image);
 	return output_file;
