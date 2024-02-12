@@ -67,3 +67,9 @@ void scan_receipt(cv::Mat photo);
  * reconnaissance de glyphes.
  */
 void extract_samples(cv::Mat photo);
+
+/**
+ * Lit tous les fichiers sous samples/ et construit letters.txt avec les
+ * features extraites des images.
+ */
+void compile_features();

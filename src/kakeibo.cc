@@ -22,6 +22,7 @@ static struct option options[] = {
 	{ "cut", no_argument, 0, 'c' },
 	{ "scan", no_argument, 0, 's' },
 	{ "extract", no_argument, 0, 'x' },
+	{ "compile", no_argument, 0, 'C' },
 	{ "debug", no_argument, 0, 'd' },
 	{}
 };
@@ -42,6 +43,8 @@ int main(int argc, char** argv)
 			break;
 		switch (c) {
 		case 'c':
+		case 'C':
+		case 's':
 		case 'x':
 			if (mode != 0)
 				bad_usage("Le mode ne peut être spécifié qu’une fois.\n");
@@ -79,6 +82,10 @@ int main(int argc, char** argv)
 			cv::Mat source = cv::imread(image_path, cv::IMREAD_COLOR);
 			extract_samples(source);
 		}
+		break;
+
+	case 'C':
+		compile_features();
 		break;
 
 	default:

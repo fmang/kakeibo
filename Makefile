@@ -9,4 +9,4 @@ kakeibo: src/kakeibo
 clean:
 	rm src/kakeibo src/*.o
 
-src/kakeibo: src/kakeibo.o src/cutter.o src/detector.o
+src/kakeibo: src/kakeibo.o src/cutter.o src/detector.o src/classifier.o
