@@ -105,7 +105,7 @@ std::string save(cv::Mat image)
 
 	static int extracted_count = 0;
 	char buffer[32];
-	std::snprintf(buffer, 32, "extracted/%04d.jpg", ++extracted_count);
+	std::snprintf(buffer, 32, "extracted/%04d.png", ++extracted_count);
 	std::string output_file = buffer;
 	cv::imwrite(output_file, image);
 	return output_file;

@@ -40,7 +40,7 @@ struct quad {
 std::vector<cv::Mat> cut_receipts(cv::Mat photo);
 
 /**
- * Enregistre l’image dans un fichier extracted/123.jpg. Renvoie le nom du
+ * Enregistre l’image dans un fichier extracted/0123.png. Renvoie le nom du
  * fichier de sortie.
  */
 std::string save(cv::Mat image);

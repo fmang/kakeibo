@@ -153,7 +153,7 @@ void compile_features()
 			continue;
 
 		std::filesystem::path path = entry.path();
-		if (path.extension() != ".jpg")
+		if (path.extension() != ".png")
 			continue;
 
 		features f = extract_features(path);
