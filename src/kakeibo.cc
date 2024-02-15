@@ -113,7 +113,8 @@ std::string save(cv::Mat image)
 
 void show(const std::string& name, cv::Mat image)
 {
-	if (!debug)
+	static bool skip_all = !debug;
+	if (skip_all)
 		return;
 
 	static std::set<std::string> skip;
@@ -125,6 +126,7 @@ void show(const std::string& name, cv::Mat image)
 	switch (key) {
 	case ' ': break;
 	case 's': save(image); break;
+	case 'q': skip_all = true; break;
 	default: skip.insert(name);
 	}
 }

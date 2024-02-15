@@ -27,6 +27,10 @@
 
 #include "kakeibo.h"
 
+#include <opencv2/imgcodecs.hpp>
+
+#include <filesystem>
+
 /**
  * Indique comment découper une image en 5 cellules selon une dimension de
  * l’image, et la dimension croisée. La 2e dimension sert à éviter de trop
@@ -74,6 +78,34 @@ static std::vector<cv::Rect> build_cells(int width, int height)
 	return cells;
 }
 
+struct features {
+	std::string path;
+	std::string label;
+};
+
+static features extract_features(const std::filesystem::path& path)
+{
+	features f;
+	f.path = path;
+	f.label = path.parent_path().filename();
+
+	cv::Mat pixels = cv::imread(path, cv::IMREAD_GRAYSCALE);
+	show(f.label, pixels);
+
+	return f;
+}
+
 void compile_features()
 {
+	for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator("samples")) {
+		if (!entry.is_regular_file())
+			continue;
+
+		std::filesystem::path path = entry.path();
+		if (path.extension() != ".jpg")
+			continue;
+
+		features f = extract_features(path);
+		std::printf("%s,%s\n", f.path.c_str(), f.label.c_str());
+	}
 }
