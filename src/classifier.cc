@@ -42,7 +42,7 @@
 static std::vector<int> split_axis(int main_size, int cross_size)
 {
 	int middle = main_size / 2;
-	int min_size = cross_size / 2;
+	int min_size = cross_size * 2 / 3;
 	main_size = std::max(main_size, min_size);
 
 	int center_size = main_size / 3;
@@ -109,6 +109,7 @@ static void fit_grid(grid& g, cv::Mat image)
 struct features {
 	std::string path;
 	std::string label;
+	std::vector<int> values;
 };
 
 static cv::Rect scale_rect(const cv::Rect& rect, int factor)
@@ -130,6 +131,10 @@ static features extract_features(const std::filesystem::path& path)
 	cv::Mat pixels = cv::imread(path, cv::IMREAD_GRAYSCALE);
 	struct grid grid = build_grid(pixels.cols, pixels.rows);
 	fit_grid(grid, pixels);
+	for (const cv::Rect& cell : grid.horizontal_cells)
+		f.values.push_back(cell.width * 10 / pixels.cols);
+	for (const cv::Rect& cell : grid.vertical_cells)
+		f.values.push_back(cell.height * 10 / pixels.rows);
 
 	if (debug) {
 		static const int scale_factor = 4;
@@ -157,6 +162,9 @@ void compile_features()
 			continue;
 
 		features f = extract_features(path);
-		std::printf("%s,%s\n", f.path.c_str(), f.label.c_str());
+		std::printf("%s,%s", f.path.c_str(), f.label.c_str());
+		for (int value : f.values)
+			std::printf(",%d", value);
+		std::printf("\n");
 	}
 }
