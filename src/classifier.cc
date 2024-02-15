@@ -132,9 +132,9 @@ static features extract_features(const std::filesystem::path& path)
 	struct grid grid = build_grid(pixels.cols, pixels.rows);
 	fit_grid(grid, pixels);
 	for (const cv::Rect& cell : grid.horizontal_cells)
-		f.values.push_back(cell.width * 10 / pixels.cols);
+		f.values.push_back(cell.width * 9 / pixels.cols);
 	for (const cv::Rect& cell : grid.vertical_cells)
-		f.values.push_back(cell.height * 10 / pixels.rows);
+		f.values.push_back(cell.height * 9 / pixels.rows);
 
 	if (debug) {
 		static const int scale_factor = 4;
@@ -162,9 +162,9 @@ void compile_features()
 			continue;
 
 		features f = extract_features(path);
-		std::printf("%s,%s", f.path.c_str(), f.label.c_str());
+		std::printf("%s,%s,", f.path.c_str(), f.label.c_str());
 		for (int value : f.values)
-			std::printf(",%d", value);
+			std::printf("%d", value);
 		std::printf("\n");
 	}
 }
