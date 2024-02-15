@@ -27,6 +27,53 @@
 
 #include "kakeibo.h"
 
+/**
+ * Indique comment découper une image en 5 cellules selon une dimension de
+ * l’image, et la dimension croisée. La 2e dimension sert à éviter de trop
+ * étirer l’image.
+ *
+ * Renvoie 6 coordonnées définissant les bords des 5 cellules.
+ */
+static std::vector<int> split_axis(int main_size, int cross_size)
+{
+	int middle = main_size / 2;
+	int min_size = cross_size * 2 / 3;
+	main_size = std::min(main_size, min_size);
+
+	int center_size = main_size / 3;
+	int lateral_size = (main_size - center_size) / 3;
+
+	return {
+		middle - main_size / 2,
+		middle - center_size - lateral_size,
+		middle - center_size,
+		middle + center_size,
+		middle + center_size + lateral_size,
+		middle + main_size / 2 + main_size % 2,
+	};
+}
+
+static std::vector<cv::Rect> build_cells(int width, int height)
+{
+	std::vector<cv::Rect> cells;
+
+	std::vector<int> horizontal_rule = split_axis(width, height);
+	for (size_t i = 1; i < horizontal_rule.size(); ++i) {
+		int cell_x = horizontal_rule[i - 1];
+		int cell_width = horizontal_rule[i] - cell_x;
+		cells.emplace_back(cell_x, 0, cell_width, height);
+	}
+
+	std::vector<int> vertical_rule = split_axis(height, width);
+	for (size_t i = 1; i < vertical_rule.size(); ++i) {
+		int cell_y = vertical_rule[i - 1];
+		int cell_height = vertical_rule[i] - cell_y;
+		cells.emplace_back(cell_y, 0, width, cell_height);
+	}
+
+	return cells;
+}
+
 void compile_features()
 {
 }
