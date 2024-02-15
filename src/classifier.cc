@@ -28,6 +28,7 @@
 #include "kakeibo.h"
 
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include <filesystem>
 
@@ -41,18 +42,18 @@
 static std::vector<int> split_axis(int main_size, int cross_size)
 {
 	int middle = main_size / 2;
-	int min_size = cross_size * 2 / 3;
-	main_size = std::min(main_size, min_size);
+	int min_size = cross_size / 2;
+	main_size = std::max(main_size, min_size);
 
 	int center_size = main_size / 3;
 	int lateral_size = (main_size - center_size) / 3;
 
 	return {
 		middle - main_size / 2,
-		middle - center_size - lateral_size,
-		middle - center_size,
-		middle + center_size,
-		middle + center_size + lateral_size,
+		middle - center_size / 2 - lateral_size,
+		middle - center_size / 2,
+		middle + center_size / 2,
+		middle + center_size / 2 + lateral_size,
 		middle + main_size / 2 + main_size % 2,
 	};
 }
@@ -72,7 +73,7 @@ static std::vector<cv::Rect> build_cells(int width, int height)
 	for (size_t i = 1; i < vertical_rule.size(); ++i) {
 		int cell_y = vertical_rule[i - 1];
 		int cell_height = vertical_rule[i] - cell_y;
-		cells.emplace_back(cell_y, 0, width, cell_height);
+		cells.emplace_back(0, cell_y, width, cell_height);
 	}
 
 	return cells;
@@ -83,6 +84,16 @@ struct features {
 	std::string label;
 };
 
+static cv::Rect scale_rect(const cv::Rect& rect, int factor)
+{
+	return cv::Rect {
+		rect.x * factor,
+		rect.y * factor,
+		rect.width * factor,
+		rect.height * factor,
+	};
+}
+
 static features extract_features(const std::filesystem::path& path)
 {
 	features f;
@@ -90,7 +101,17 @@ static features extract_features(const std::filesystem::path& path)
 	f.label = path.parent_path().filename();
 
 	cv::Mat pixels = cv::imread(path, cv::IMREAD_GRAYSCALE);
-	show(f.label, pixels);
+	std::vector<cv::Rect> cells = build_cells(pixels.cols, pixels.rows);
+
+	if (debug) {
+		static const int scale_factor = 4;
+		cv::Mat drawing;
+		cv::cvtColor(pixels, drawing, cv::COLOR_GRAY2BGR);
+		cv::resize(drawing, drawing, cv::Size(), scale_factor, scale_factor, cv::INTER_NEAREST);
+		for (const cv::Rect& cell : cells)
+			cv::rectangle(drawing, scale_rect(cell, scale_factor), cv::Scalar(255, 0, 0), 1);
+		show(f.label, drawing);
+	}
 
 	return f;
 }
