@@ -58,9 +58,15 @@ static std::vector<int> split_axis(int main_size, int cross_size)
 	};
 }
 
+struct cell {
+	cell(cv::Rect box) : box(box) {}
+	cv::Rect box;
+	double fill_ratio;
+};
+
 struct grid {
-	std::vector<cv::Rect> horizontal_cells;
-	std::vector<cv::Rect> vertical_cells;
+	std::vector<cell> horizontal_cells;
+	std::vector<cell> vertical_cells;
 };
 
 static grid build_grid(int width, int height)
@@ -71,39 +77,43 @@ static grid build_grid(int width, int height)
 	for (size_t i = 1; i < horizontal_rule.size(); ++i) {
 		int cell_x = horizontal_rule[i - 1];
 		int cell_width = horizontal_rule[i] - cell_x;
-		g.vertical_cells.emplace_back(cell_x, 0, cell_width, height);
+		g.vertical_cells.emplace_back(cv::Rect(cell_x, 0, cell_width, height));
 	}
 
 	std::vector<int> vertical_rule = split_axis(height, width);
 	for (size_t i = 1; i < vertical_rule.size(); ++i) {
 		int cell_y = vertical_rule[i - 1];
 		int cell_height = vertical_rule[i] - cell_y;
-		g.horizontal_cells.emplace_back(0, cell_y, width, cell_height);
+		g.horizontal_cells.emplace_back(cv::Rect(0, cell_y, width, cell_height));
 	}
 
 	return g;
 }
 
-static cv::Rect fit_cell(cv::Rect cell, cv::Mat image)
+static cell fit_cell(cv::Rect box, cv::Mat image)
 {
 	cv::Rect shape { 0, 0, image.cols, image.rows };
-	cell &= shape;
-	cv::Mat roi = image(cell);
+	box &= shape;
+	cv::Mat roi = image(box);
 	std::vector<cv::Point> whites;
 	cv::findNonZero(roi, whites);
-	cv::Rect fitted_cell = cv::boundingRect(whites);
-	fitted_cell.x += cell.x;
-	fitted_cell.y += cell.y;
+
+	struct cell fitted_cell = cv::boundingRect(whites);
+	fitted_cell.box.x += box.x;
+	fitted_cell.box.y += box.y;
+	double area = fitted_cell.box.area();
+	fitted_cell.fill_ratio = area == 0 ? 0 : whites.size() / area;
+
 	return fitted_cell;
 }
 
 static void fit_grid(grid& g, cv::Mat image)
 {
-	for (cv::Rect& cell : g.horizontal_cells)
-		cell = fit_cell(cell, image);
+	for (struct cell& cell : g.horizontal_cells)
+		cell = fit_cell(cell.box, image);
 
-	for (cv::Rect& cell : g.vertical_cells)
-		cell = fit_cell(cell, image);
+	for (struct cell& cell : g.vertical_cells)
+		cell = fit_cell(cell.box, image);
 }
 
 struct features {
@@ -122,6 +132,16 @@ static cv::Rect scale_rect(const cv::Rect& rect, int factor)
 	};
 }
 
+/**
+ * Reçoit un nombre flottant entre 0 et 1, et renvoie un nombre entier entre 0
+ * et 9. On prend une racine pour faire ressortir les différences sur les
+ * petites valeurs.
+ */
+int normalize_ratio(double ratio)
+{
+	return std::cbrt(ratio) * 9;
+}
+
 static features extract_features(const std::filesystem::path& path)
 {
 	features f;
@@ -131,20 +151,24 @@ static features extract_features(const std::filesystem::path& path)
 	cv::Mat pixels = cv::imread(path, cv::IMREAD_GRAYSCALE);
 	struct grid grid = build_grid(pixels.cols, pixels.rows);
 	fit_grid(grid, pixels);
-	for (const cv::Rect& cell : grid.horizontal_cells)
-		f.values.push_back(cell.width * 9 / pixels.cols);
-	for (const cv::Rect& cell : grid.vertical_cells)
-		f.values.push_back(cell.height * 9 / pixels.rows);
+	for (const struct cell& cell : grid.horizontal_cells) {
+		f.values.push_back(cell.box.width * 9 / pixels.cols);
+		f.values.push_back(normalize_ratio(cell.fill_ratio));
+	}
+	for (const struct cell& cell : grid.vertical_cells) {
+		f.values.push_back(cell.box.height * 9 / pixels.rows);
+		f.values.push_back(normalize_ratio(cell.fill_ratio));
+	}
 
 	if (debug) {
 		static const int scale_factor = 4;
 		cv::Mat drawing;
 		cv::cvtColor(pixels, drawing, cv::COLOR_GRAY2BGR);
 		cv::resize(drawing, drawing, cv::Size(), scale_factor, scale_factor, cv::INTER_NEAREST);
-		for (const cv::Rect& cell : grid.horizontal_cells)
-			cv::rectangle(drawing, scale_rect(cell, scale_factor), cv::Scalar(255, 0, 0), 1);
-		for (const cv::Rect& cell : grid.vertical_cells)
-			cv::rectangle(drawing, scale_rect(cell, scale_factor), cv::Scalar(0, 0, 255), 1);
+		for (const struct cell& cell : grid.horizontal_cells)
+			cv::rectangle(drawing, scale_rect(cell.box, scale_factor), cv::Scalar(255, 0, 0), 1);
+		for (const struct cell& cell : grid.vertical_cells)
+			cv::rectangle(drawing, scale_rect(cell.box, scale_factor), cv::Scalar(0, 0, 255), 1);
 		show(f.label, drawing);
 	}
 
