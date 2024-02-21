@@ -16,6 +16,8 @@ static const char* usage = \
 	"Usage: kakeibo --cut FICHIER…\n"
 	"       kakeibo --scan FICHIER…\n"
 	"       kakeibo --extract FICHIER…\n"
+	"       kakeibo --compile\n"
+	"       kakeibo --train\n"
 ;
 
 static struct option options[] = {
@@ -23,6 +25,7 @@ static struct option options[] = {
 	{ "scan", no_argument, 0, 's' },
 	{ "extract", no_argument, 0, 'x' },
 	{ "compile", no_argument, 0, 'C' },
+	{ "train", no_argument, 0, 't' },
 	{ "debug", no_argument, 0, 'd' },
 	{}
 };
@@ -45,6 +48,7 @@ int main(int argc, char** argv)
 		case 'c':
 		case 'C':
 		case 's':
+		case 't':
 		case 'x':
 			if (mode != 0)
 				bad_usage("Le mode ne peut être spécifié qu’une fois.\n");
@@ -86,6 +90,10 @@ int main(int argc, char** argv)
 
 	case 'C':
 		compile_features();
+		break;
+
+	case 't':
+		train_model();
 		break;
 
 	default:

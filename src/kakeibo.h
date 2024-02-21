@@ -69,7 +69,13 @@ void scan_receipt(cv::Mat photo);
 void extract_samples(cv::Mat photo);
 
 /**
- * Lit tous les fichiers sous samples/ et construit letters.txt avec les
- * features extraites des images.
+ * Lit tous les fichiers sous samples/ et écrit sur stdout un CSV avec features
+ * extraites des échantillons.
  */
 void compile_features();
+
+/**
+ * Reçoit le CSV généré par compile_features sur stdin et constuit un modèle
+ * pour identifier les lettres.
+ */
+void train_model();
