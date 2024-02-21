@@ -29,6 +29,7 @@
 
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/ml.hpp>
 
 #include <filesystem>
 #include <iostream>
@@ -196,7 +197,7 @@ void compile_features()
 
 struct features_database {
 	cv::Mat features;
-	cv::Mat responses;
+	std::vector<int> responses;
 };
 
 static float parse_feature(char c)
@@ -237,13 +238,31 @@ static features_database load_features()
 		db.features.push_back(row_features);
 	}
 
-	db.responses = cv::Mat(responses_vector);
 	return db;
 }
 
 void train_model()
 {
 	features_database db = load_features();
-	std::cout << db.responses << std::endl;
-	std::cout << db.features << std::endl;
+	cv::Ptr<cv::ml::TrainData> tdata = cv::ml::TrainData::create(db.features, cv::ml::ROW_SAMPLE, cv::Mat(db.responses));
+
+	cv::Ptr<cv::ml::RTrees> model = cv::ml::RTrees::create();
+	model->setMaxDepth(10);
+	model->setMinSampleCount(10);
+	model->setRegressionAccuracy(0);
+	model->setUseSurrogates(false);
+	model->setMaxCategories(15);
+	model->setPriors(cv::Mat());
+	model->setCalculateVarImportance(true);
+	model->setActiveVarCount(4);
+	cv::TermCriteria tc(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 100, 0.01f);
+	model->setTermCriteria(tc);
+	model->train(tdata); // segfault ?
+
+	for (int i = 0; i < db.features.rows; i++) {
+		cv::Mat sample = db.features.row(i);
+		int expected = db.responses[i];
+		float result = model->predict(sample);
+		std::printf("expected %d, got %f\n", expected, result);
+	}
 }
