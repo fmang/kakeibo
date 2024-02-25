@@ -78,21 +78,19 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 	// Résultat.
 	std::vector<cv::Mat> receipts;
 
-	// Grise l’image avant de travailler sur les contours.
+	// Sélectionne uniquement les pixels clairs avec une saturation quasi-nulle.
 	cv::Mat image;
-	cv::cvtColor(source, image, cv::COLOR_BGR2GRAY);
-
-	// Floute les détails pour que le bruit du fond ne génère pas de bords.
-	// Comme nos tables sont en bois, le motif du bois casse tout.
-	cv::GaussianBlur(image, image, cv::Size(5, 5), 0);
-
-	// Détection des bords avec un fort seuil. On s’attend à des tickets
-	// blancs sur fond foncé.
-	cv::Canny(image, image, 75, 200);
+	cv::cvtColor(source, image, cv::COLOR_BGR2HSV);
+	cv::inRange(image, cv::Scalar(0, 0, 128), cv::Scalar(255, 32, 255), image);
 
 	// Dilatation pour que les bords fragiles se solidifient.
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 	cv::dilate(image, image, element);
+	show("shapes", image);
+
+	cv::Mat drawing;
+	if (debug)
+		drawing = source.clone();
 
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -100,6 +98,10 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 		// Traiter uniquement les rectangles;
 		std::vector<cv::Point> poly;
 		cv::approxPolyDP(contours[i], poly, 100, true /* closed */);
+
+		if (debug)
+			cv::polylines(drawing, poly, true, poly.size() == 4 ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255), 3);
+
 		if (poly.size() != 4)
 			continue;
 
@@ -130,6 +132,9 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 		cv::warpPerspective(source, extracted_receipt, transform, cv::Size(new_width, new_height));
 		receipts.push_back(extracted_receipt);
 	}
+
+	if (debug)
+		show("contours", drawing);
 
 	return receipts;
 }
