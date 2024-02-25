@@ -2,6 +2,7 @@
 
 import csv
 import numpy as np
+import pickle
 import sklearn.metrics
 import sklearn.model_selection
 import sklearn.preprocessing
@@ -30,6 +31,12 @@ def main():
 	model.fit(x_train, y_train)
 	predicted = model.predict(x_test)
 	print(sklearn.metrics.classification_report(y_test, predicted))
+
+	with open('model', 'wb') as f:
+		pickle.dump(model, f)
+
+	with open('labels', 'wb') as f:
+		pickle.dump(label_encoder, f)
 
 if __name__ == '__main__':
 	main()
