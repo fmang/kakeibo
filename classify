@@ -16,7 +16,7 @@ def decode():
 		x = np.array(words)
 		prediction = model.predict(x)
 		letters = label_encoder.inverse_transform(prediction)
-		print(' '.join(letters))
+		print(''.join(letters))
 
 if __name__ == '__main__':
 	decode()
