@@ -8,7 +8,10 @@
 
 #include "kakeibo.h"
 
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+
+#include <filesystem>
 
 /**
  * Représente une ligne de texte. box est la bounding box sur l’image d’entrée.
@@ -192,5 +195,59 @@ void extract_samples(cv::Mat source)
 	for (auto& line : extract_text_lines(binary)) {
 		for (auto& letter : line.letters)
 			save(binary(letter));
+	}
+}
+
+/**
+ * Représente un échantillon stocké dans le dossier samples/, prétraité pour
+ * servir à l’entrainement du modèle de reconnaissance de lettre.
+ */
+struct features {
+	std::string path;
+	std::string label;
+	std::vector<int> values;
+};
+
+/**
+ * Construit un échantillon pour l’apprentissage depuis une image noir et
+ * blanc.
+ */
+static features extract_features(const std::filesystem::path& path)
+{
+	features f;
+	f.path = path;
+	f.label = path.parent_path().filename();
+
+	cv::Mat pixels = cv::imread(path, cv::IMREAD_GRAYSCALE);
+	cv::resize(pixels, pixels, cv::Size(8, 8));
+	for (int y = 0; y < pixels.rows; ++y) {
+		for (int x = 0; x < pixels.cols; ++x) {
+			int value = pixels.at<uchar>(y, x);
+			f.values.push_back(value * 9 / 255.);
+		}
+	}
+
+	return f;
+}
+
+/**
+ * Fouille toutes les images du dossier samples/ et bâtit un CSV pour entrainer
+ * le modèle de reconnaissance de lettres.
+ */
+void compile_features()
+{
+	for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator("samples")) {
+		if (!entry.is_regular_file())
+			continue;
+
+		std::filesystem::path path = entry.path();
+		if (path.extension() != ".png")
+			continue;
+
+		features f = extract_features(path);
+		std::printf("%s,%s,", f.path.c_str(), f.label.c_str());
+		for (int value : f.values)
+			std::printf("%d", value);
+		std::printf("\n");
 	}
 }

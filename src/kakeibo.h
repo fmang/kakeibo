@@ -73,9 +73,3 @@ void extract_samples(cv::Mat photo);
  * extraites des échantillons.
  */
 void compile_features();
-
-/**
- * Reçoit le CSV généré par compile_features sur stdin et constuit un modèle
- * pour identifier les lettres.
- */
-void train_model();
