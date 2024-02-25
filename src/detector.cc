@@ -226,8 +226,10 @@ void scan_receipt(cv::Mat source)
 void extract_samples(cv::Mat source)
 {
 	cv::Mat binary = binarize(source);
-	for (auto& line : extract_text_lines(binary)) {
-		for (auto& letter : line.letters)
+	std::vector<text_line> lines = extract_text_lines(binary);
+	compact_lines(lines);
+	for (const text_line& line : lines) {
+		for (const cv::Rect& letter : line.letters)
 			save(binary(letter));
 	}
 }
