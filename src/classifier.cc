@@ -29,7 +29,6 @@
 
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/ml.hpp>
 
 #include <filesystem>
 #include <iostream>
@@ -73,77 +72,5 @@ void compile_features()
 		for (int value : f.values)
 			std::printf("%d", value);
 		std::printf("\n");
-	}
-}
-
-struct features_database {
-	cv::Mat features;
-	std::vector<int> responses;
-};
-
-static float parse_feature(char c)
-{
-	if (c < '0' || c > '9')
-		throw std::invalid_argument("bad digit");
-	return (c - '0') / 9.;
-}
-
-static features_database load_features()
-{
-	features_database db;
-	int features_count = -1;
-	std::vector<int> responses_vector;
-
-	for (std::string row; std::getline(std::cin, row);) {
-		auto first_comma = std::find(std::begin(row), std::end(row), ',');
-		if (first_comma == std::end(row))
-			throw std::invalid_argument("expected a 3-column CSV");
-
-		auto label_column = std::next(first_comma);
-		auto second_comma = std::find(label_column, std::end(row), ',');
-		if (second_comma == std::end(row))
-			throw std::invalid_argument("expected a 3-column CSV");
-
-		auto features_column = std::next(second_comma);
-		int row_features_count = std::end(row) - features_column;
-		if (features_count == -1)
-			features_count = row_features_count;
-		else if (row_features_count != features_count)
-			throw std::invalid_argument("inconsistent features count");
-
-		responses_vector.push_back(*label_column);
-		cv::Mat row_features(1, features_count, CV_32F);
-		int i = 0;
-		for (auto it = features_column; it != std::end(row); ++it)
-			row_features.at<float>(i++) = parse_feature(*it);
-		db.features.push_back(row_features);
-	}
-
-	return db;
-}
-
-void train_model()
-{
-	features_database db = load_features();
-	cv::Ptr<cv::ml::TrainData> tdata = cv::ml::TrainData::create(db.features, cv::ml::ROW_SAMPLE, cv::Mat(db.responses));
-
-	cv::Ptr<cv::ml::RTrees> model = cv::ml::RTrees::create();
-	model->setMaxDepth(10);
-	model->setMinSampleCount(10);
-	model->setRegressionAccuracy(0);
-	model->setUseSurrogates(false);
-	model->setMaxCategories(15);
-	model->setPriors(cv::Mat());
-	model->setCalculateVarImportance(true);
-	model->setActiveVarCount(4);
-	cv::TermCriteria tc(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 100, 0.01f);
-	model->setTermCriteria(tc);
-	model->train(tdata); // segfault ?
-
-	for (int i = 0; i < db.features.rows; i++) {
-		cv::Mat sample = db.features.row(i);
-		int expected = db.responses[i];
-		float result = model->predict(sample);
-		std::printf("expected %d, got %f\n", expected, result);
 	}
 }

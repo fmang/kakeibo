@@ -17,7 +17,6 @@ static const char* usage = \
 	"       kakeibo --scan FICHIER…\n"
 	"       kakeibo --extract FICHIER…\n"
 	"       kakeibo --compile\n"
-	"       kakeibo --train\n"
 ;
 
 static struct option options[] = {
@@ -90,10 +89,6 @@ int main(int argc, char** argv)
 
 	case 'C':
 		compile_features();
-		break;
-
-	case 't':
-		train_model();
 		break;
 
 	default:
