@@ -87,7 +87,9 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 		cv::Rect box = cv::boundingRect(contour);
 		if (box.area() < 50) // Ignore le bruit.
 			continue;
-		lines.push_back(extract_text_line(binary, box));
+		text_line line = extract_text_line(binary, box);
+		if (!line.letters.empty())
+			lines.push_back(line);
 	}
 
 	return lines;
@@ -180,6 +182,25 @@ static cv::Mat binarize(cv::Mat color)
 	return binary;
 }
 
+/**
+ * Reçoit une image noir et blanc et génère une chaine de 64 chiffres avec les
+ * données de l’échantillon en niveau de gris, de résolution 8×8.
+ */
+static std::string extract_features(cv::Mat sample)
+{
+	std::string word;
+	cv::Mat pixels;
+	cv::resize(sample, pixels, cv::Size(8, 8));
+	for (int y = 0; y < pixels.rows; ++y) {
+		for (int x = 0; x < pixels.cols; ++x) {
+			int value = pixels.at<uchar>(y, x);
+			int scaled = value * 9 / 255.;
+			word.push_back('0' + scaled);
+		}
+	}
+	return word;
+}
+
 void scan_receipt(cv::Mat source)
 {
 	cv::Mat binary = binarize(source);
@@ -187,6 +208,19 @@ void scan_receipt(cv::Mat source)
 	compact_lines(lines);
 	if (debug)
 		show_text_lines(source, lines);
+
+	for (const text_line& line : lines) {
+		bool first = true;
+		for (const cv::Rect& letter : line.letters) {
+			if (first)
+				first = false;
+			else
+				std::putchar(' ');
+			std::string word = extract_features(binary(letter));
+			std::fputs(word.c_str(), stdout);
+		}
+		std::putchar('\n');
+	}
 }
 
 void extract_samples(cv::Mat source)
@@ -205,28 +239,20 @@ void extract_samples(cv::Mat source)
 struct features {
 	std::string path;
 	std::string label;
-	std::vector<int> values;
+	std::string values;
 };
 
 /**
  * Construit un échantillon pour l’apprentissage depuis une image noir et
  * blanc.
  */
-static features extract_features(const std::filesystem::path& path)
+static features load_features(const std::filesystem::path& path)
 {
+	cv::Mat sample = cv::imread(path, cv::IMREAD_GRAYSCALE);
 	features f;
 	f.path = path;
 	f.label = path.parent_path().filename();
-
-	cv::Mat pixels = cv::imread(path, cv::IMREAD_GRAYSCALE);
-	cv::resize(pixels, pixels, cv::Size(8, 8));
-	for (int y = 0; y < pixels.rows; ++y) {
-		for (int x = 0; x < pixels.cols; ++x) {
-			int value = pixels.at<uchar>(y, x);
-			f.values.push_back(value * 9 / 255.);
-		}
-	}
-
+	f.values = extract_features(sample);
 	return f;
 }
 
@@ -244,10 +270,7 @@ void compile_features()
 		if (path.extension() != ".png")
 			continue;
 
-		features f = extract_features(path);
-		std::printf("%s,%s,", f.path.c_str(), f.label.c_str());
-		for (int value : f.values)
-			std::printf("%d", value);
-		std::printf("\n");
+		features f = load_features(path);
+		std::printf("%s,%s,%s\n", f.path.c_str(), f.label.c_str(), f.values.c_str());
 	}
 }
