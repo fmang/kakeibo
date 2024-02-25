@@ -52,7 +52,7 @@ static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
 	cv::findContours(extract, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect letter = cv::boundingRect(contour);
-		if (letter.area() < 50) // Ignore le bruit.
+		if (letter.area() < 100) // Ignore le bruit.
 			continue;
 
 		letter.x += line_box.x - dilatation.width;
