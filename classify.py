@@ -3,6 +3,7 @@
 import csv
 import numpy as np
 import sklearn.metrics
+import sklearn.model_selection
 import sklearn.preprocessing
 import sklearn.svm
 import sys
@@ -24,10 +25,11 @@ def load_data():
 
 def main():
 	x, y = load_data()
-	model = sklearn.svm.SVC(gamma=0.001)
-	model.fit(x, y)
-	predicted = model.predict(x)
-	print(sklearn.metrics.classification_report(y, predicted))
+	x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.5)
+	model = sklearn.svm.SVC(gamma=0.05)
+	model.fit(x_train, y_train)
+	predicted = model.predict(x_test)
+	print(sklearn.metrics.classification_report(y_test, predicted))
 
 if __name__ == '__main__':
 	main()
