@@ -34,115 +34,11 @@
 #include <filesystem>
 #include <iostream>
 
-/**
- * Indique comment découper une image en 5 cellules selon une dimension de
- * l’image, et la dimension croisée. La 2e dimension sert à éviter de trop
- * étirer l’image.
- *
- * Renvoie 6 coordonnées définissant les bords des 5 cellules.
- */
-static std::vector<int> split_axis(int main_size, int cross_size)
-{
-	int middle = main_size / 2;
-	int min_size = cross_size * 2 / 3;
-	main_size = std::max(main_size, min_size);
-
-	int center_size = main_size / 3;
-	int lateral_size = (main_size - center_size) / 3;
-
-	return {
-		middle - main_size / 2,
-		middle - center_size / 2 - lateral_size,
-		middle - center_size / 2,
-		middle + center_size / 2,
-		middle + center_size / 2 + lateral_size,
-		middle + main_size / 2 + main_size % 2,
-	};
-}
-
-struct cell {
-	cell(cv::Rect box) : box(box) {}
-	cv::Rect box;
-	double fill_ratio;
-};
-
-struct grid {
-	std::vector<cell> horizontal_cells;
-	std::vector<cell> vertical_cells;
-};
-
-static grid build_grid(int width, int height)
-{
-	grid g;
-
-	std::vector<int> horizontal_rule = split_axis(width, height);
-	for (size_t i = 1; i < horizontal_rule.size(); ++i) {
-		int cell_x = horizontal_rule[i - 1];
-		int cell_width = horizontal_rule[i] - cell_x;
-		g.vertical_cells.emplace_back(cv::Rect(cell_x, 0, cell_width, height));
-	}
-
-	std::vector<int> vertical_rule = split_axis(height, width);
-	for (size_t i = 1; i < vertical_rule.size(); ++i) {
-		int cell_y = vertical_rule[i - 1];
-		int cell_height = vertical_rule[i] - cell_y;
-		g.horizontal_cells.emplace_back(cv::Rect(0, cell_y, width, cell_height));
-	}
-
-	return g;
-}
-
-static cell fit_cell(cv::Rect box, cv::Mat image)
-{
-	cv::Rect shape { 0, 0, image.cols, image.rows };
-	box &= shape;
-	cv::Mat roi = image(box);
-	std::vector<cv::Point> whites;
-	cv::findNonZero(roi, whites);
-
-	struct cell fitted_cell = cv::boundingRect(whites);
-	fitted_cell.box.x += box.x;
-	fitted_cell.box.y += box.y;
-	double area = fitted_cell.box.area();
-	fitted_cell.fill_ratio = area == 0 ? 0 : whites.size() / area;
-
-	return fitted_cell;
-}
-
-static void fit_grid(grid& g, cv::Mat image)
-{
-	for (struct cell& cell : g.horizontal_cells)
-		cell = fit_cell(cell.box, image);
-
-	for (struct cell& cell : g.vertical_cells)
-		cell = fit_cell(cell.box, image);
-}
-
 struct features {
 	std::string path;
 	std::string label;
 	std::vector<int> values;
 };
-
-static cv::Rect scale_rect(const cv::Rect& rect, int factor)
-{
-	return cv::Rect {
-		rect.x * factor,
-		rect.y * factor,
-		rect.width * factor,
-		rect.height * factor,
-	};
-}
-
-/**
- * Reçoit un nombre flottant entre 0 et 1, et renvoie un nombre entier entre 0
- * et 9. On prend une racine pour faire ressortir les différences sur les
- * petites valeurs.
- */
-int normalize_ratio(double ratio)
-{
-	return std::cbrt(ratio) * 9;
-}
 
 static features extract_features(const std::filesystem::path& path)
 {
@@ -151,27 +47,12 @@ static features extract_features(const std::filesystem::path& path)
 	f.label = path.parent_path().filename();
 
 	cv::Mat pixels = cv::imread(path, cv::IMREAD_GRAYSCALE);
-	struct grid grid = build_grid(pixels.cols, pixels.rows);
-	fit_grid(grid, pixels);
-	for (const struct cell& cell : grid.horizontal_cells) {
-		f.values.push_back(cell.box.width * 9 / pixels.cols);
-		f.values.push_back(normalize_ratio(cell.fill_ratio));
-	}
-	for (const struct cell& cell : grid.vertical_cells) {
-		f.values.push_back(cell.box.height * 9 / pixels.rows);
-		f.values.push_back(normalize_ratio(cell.fill_ratio));
-	}
-
-	if (debug) {
-		static const int scale_factor = 4;
-		cv::Mat drawing;
-		cv::cvtColor(pixels, drawing, cv::COLOR_GRAY2BGR);
-		cv::resize(drawing, drawing, cv::Size(), scale_factor, scale_factor, cv::INTER_NEAREST);
-		for (const struct cell& cell : grid.horizontal_cells)
-			cv::rectangle(drawing, scale_rect(cell.box, scale_factor), cv::Scalar(255, 0, 0), 1);
-		for (const struct cell& cell : grid.vertical_cells)
-			cv::rectangle(drawing, scale_rect(cell.box, scale_factor), cv::Scalar(0, 0, 255), 1);
-		show(f.label, drawing);
+	cv::resize(pixels, pixels, cv::Size(8, 8));
+	for (int y = 0; y < pixels.rows; ++y) {
+		for (int x = 0; x < pixels.cols; ++x) {
+			int value = pixels.at<uchar>(y, x);
+			f.values.push_back(value * 9 / 255.);
+		}
 	}
 
 	return f;
