@@ -89,7 +89,7 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 	show("shapes", image);
 
 	cv::Mat drawing;
-	if (debug)
+	if (explain)
 		drawing = source.clone();
 
 	std::vector<std::vector<cv::Point>> contours;
@@ -99,7 +99,7 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 		std::vector<cv::Point> poly;
 		cv::approxPolyDP(contours[i], poly, 100, true /* closed */);
 
-		if (debug)
+		if (explain)
 			cv::polylines(drawing, poly, true, poly.size() == 4 ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255), 3);
 
 		if (poly.size() != 4)
@@ -133,7 +133,7 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 		receipts.push_back(extracted_receipt);
 	}
 
-	if (debug)
+	if (explain)
 		show("contours", drawing);
 
 	return receipts;

@@ -9,7 +9,7 @@
 #include <getopt.h>
 #include <set>
 
-bool debug = false;
+bool explain = false;
 char mode = 0;
 
 static const char* usage = \
@@ -25,7 +25,7 @@ static struct option options[] = {
 	{ "extract", no_argument, 0, 'x' },
 	{ "compile", no_argument, 0, 'C' },
 	{ "train", no_argument, 0, 't' },
-	{ "debug", no_argument, 0, 'd' },
+	{ "explain", no_argument, 0, 'e' },
 	{}
 };
 
@@ -53,8 +53,8 @@ int main(int argc, char** argv)
 				bad_usage("Le mode ne peut être spécifié qu’une fois.\n");
 			mode = c;
 			break;
-		case 'd':
-			debug = true;
+		case 'e':
+			explain = true;
 			break;
 		default:
 			bad_usage();
@@ -116,7 +116,7 @@ std::string save(cv::Mat image)
 
 void show(const std::string& name, cv::Mat image)
 {
-	if (!debug)
+	if (!explain)
 		return;
 
 	static std::set<std::string> skip;
@@ -128,7 +128,7 @@ void show(const std::string& name, cv::Mat image)
 	switch (key) {
 	case ' ': break;
 	case 's': save(image); break;
-	case 'q': debug = false; break;
+	case 'q': explain = false; break;
 	default: skip.insert(name);
 	}
 }

@@ -15,9 +15,9 @@
 extern char mode;
 
 /**
- * Si activé via --debug, affiche visuellement les données traitées.
+ * Si activé via --explain, affiche visuellement les données traitées.
  */
-extern bool debug;
+extern bool explain;
 
 /**
  * Reçoit un contour contenant 4 points et réordonne les points dans le sens
@@ -52,7 +52,7 @@ std::string save(cv::Mat image);
  * toutes les demandes d’affichage successives de la même image seront
  * ignorées.
  *
- * Nécessite --debug pour être activée.
+ * Nécessite --explain pour être activée.
  */
 void show(const std::string& name, cv::Mat image);
 

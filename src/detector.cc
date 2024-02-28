@@ -206,7 +206,7 @@ void scan_receipt(cv::Mat source)
 	cv::Mat binary = binarize(source);
 	std::vector<text_line> lines = extract_text_lines(binary);
 	compact_lines(lines);
-	if (debug)
+	if (explain)
 		show_text_lines(source, lines);
 
 	for (const text_line& line : lines) {
