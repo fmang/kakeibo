@@ -127,41 +127,28 @@ static std::vector<cv::Point> approximate_rectangle(const std::vector<cv::Point>
 	// Trouve le bord le plus long pour ne pas utilise un faux bord comme
 	// référence pour les angles.
 	size_t start_index = longest_edge_index(hull);
-	cv::Point anchor_a = hull[start_index];
-	cv::Point anchor_b = hull[(start_index + 1) % hull.size()];
+	cv::Point candidate_a = hull[start_index];
+	cv::Point candidate_b = hull[(start_index + 1) % hull.size()];
 
 	std::vector<cv::Point> corners;
-	cv::Point candidate_a;
-	cv::Point candidate_b;
-	double best_score = 0;
 	// On itère 1 index plus loin pour que le bord initial apparaisse comme
 	// candidat au moins une fois. Autrement, le dernier coin est sauté.
-	for (size_t j = 0; j <= hull.size(); ++j) {
+	for (size_t j = 0; j < hull.size(); ++j) {
 		size_t i = (start_index + 1 + j) % hull.size();
 		cv::Point a = hull[i];
 		cv::Point b = hull[(i + 1) % hull.size()];
-		double score = std::abs((b - a).cross(anchor_b - anchor_a)) / cv::norm(b - a);
-		if (explain) {
-			std::printf(
-				"anchor=(%d,%d),(%d,%d) edge=(%d,%d),(%d,%d) score=%f candidate=(%d,%d),(%d,%d) best_score=%f\n",
-				anchor_a.x, anchor_a.y, anchor_b.x, anchor_b.y,
-				a.x, a.y, b.x, b.y, score,
-				candidate_a.x, candidate_a.y, candidate_b.x, candidate_b.y, best_score
-			);
-		}
-		if (score <= best_score) {
-			cv::Point corner = intersect_lines(candidate_a, candidate_b, anchor_a, anchor_b).value();
-			if (explain)
-				std::printf("push intersection=(%d, %d)\n", corner.x, corner.y);
+		double cos = (b - a).dot(candidate_b - candidate_a) / (cv::norm(b - a) * cv::norm(candidate_b - candidate_a));
+		if (cos < 0.2) {
+			// On a un angle pratiquement droit.
+			cv::Point corner = intersect_lines(candidate_a, candidate_b, a, b).value();
 			corners.push_back(corner);
-			anchor_a = candidate_a;
-			anchor_b = candidate_b;
-			best_score = 0;
-			--j; // L’ancre a changé donc il faut revoir le bord courant.
-		} else {
 			candidate_a = a;
 			candidate_b = b;
-			best_score = score;
+		} else if (cos > 0.8) {
+			// La ligne continue, donc on prolonge le candidat.
+			candidate_b = b;
+		} else {
+			// On ignore les bords diagonaux.
 		}
 	}
 
