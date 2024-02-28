@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <optional>
 
 quad::quad(const std::vector<cv::Point>& points)
 {
@@ -73,6 +74,100 @@ void quad::shrink(int border)
 	shrink_segment(corners[1], corners[2], border);
 }
 
+/**
+ * Renvoie l’index i du plus long bord (contour[i], contoun[(i + 1) % n]).
+ */
+static size_t longest_edge_index(const std::vector<cv::Point>& contour)
+{
+	int best_index = 0;
+	int best_length = 0;
+	for (size_t i = 0; i < contour.size(); ++i) {
+		cv::Point a = contour[i];
+		cv::Point b = contour[(i + 1) % contour.size()];
+		cv::Point edge = b - a;
+		int length = edge.dot(edge); // Norme au carré.
+		if (length > best_length) {
+			best_index = i;
+			best_length = length;
+		}
+	}
+	return best_index;
+}
+
+static std::optional<cv::Point> intersect_lines(cv::Point a1, cv::Point b1, cv::Point a2, cv::Point b2)
+{
+	double dy1 = b1.y - a1.y;
+	double dx1 = a1.x - b1.x;
+	double c1 = (a1.x * dy1) + (a1.y * dx1);
+
+	double dy2 = b2.y - a2.y;
+	double dx2 = a2.x - b2.x;
+	double c2 = (a2.x * dy2) + (a2.y * dx2);
+
+	double det = (dy1 * dx2) - (dy2 * dx1);
+	if (det == 0)
+		return {};
+
+	double ix = (c1 * dx2 - c2 * dx1) / det;
+	double iy = (c2 * dy1 - c1 * dy2) / det;
+	return cv::Point(ix, iy);
+}
+
+/**
+ * Essaie de déduire un rectangle d’un contour. Renvoie la liste des angles les
+ * plus droits. S’il y en a 4, il y a de fortes chances qu’on ait un rectangle.
+ */
+static std::vector<cv::Point> approximate_rectangle(const std::vector<cv::Point>& contour)
+{
+	// Prend l’enveloppe convexe au cas où les bords seraient masqués, par
+	// exemple par un doigt.
+	std::vector<cv::Point> hull;
+	cv::convexHull(contour, hull);
+
+	// Trouve le bord le plus long pour ne pas utilise un faux bord comme
+	// référence pour les angles.
+	size_t start_index = longest_edge_index(hull);
+	cv::Point anchor_a = hull[start_index];
+	cv::Point anchor_b = hull[(start_index + 1) % hull.size()];
+
+	std::vector<cv::Point> corners;
+	cv::Point candidate_a;
+	cv::Point candidate_b;
+	double best_score = 0;
+	// On itère 1 index plus loin pour que le bord initial apparaisse comme
+	// candidat au moins une fois. Autrement, le dernier coin est sauté.
+	for (size_t j = 0; j <= hull.size(); ++j) {
+		size_t i = (start_index + 1 + j) % hull.size();
+		cv::Point a = hull[i];
+		cv::Point b = hull[(i + 1) % hull.size()];
+		double score = std::abs((b - a).cross(anchor_b - anchor_a)) / cv::norm(b - a);
+		if (explain) {
+			std::printf(
+				"anchor=(%d,%d),(%d,%d) edge=(%d,%d),(%d,%d) score=%f candidate=(%d,%d),(%d,%d) best_score=%f\n",
+				anchor_a.x, anchor_a.y, anchor_b.x, anchor_b.y,
+				a.x, a.y, b.x, b.y, score,
+				candidate_a.x, candidate_a.y, candidate_b.x, candidate_b.y, best_score
+			);
+		}
+		if (score <= best_score) {
+			cv::Point corner = intersect_lines(candidate_a, candidate_b, anchor_a, anchor_b).value();
+			if (explain)
+				std::printf("push intersection=(%d, %d)\n", corner.x, corner.y);
+			corners.push_back(corner);
+			anchor_a = candidate_a;
+			anchor_b = candidate_b;
+			best_score = 0;
+			--j; // L’ancre a changé donc il faut revoir le bord courant.
+		} else {
+			candidate_a = a;
+			candidate_b = b;
+			best_score = score;
+		}
+	}
+
+	return corners;
+}
+
 std::vector<cv::Mat> cut_receipts(cv::Mat source)
 {
 	// Résultat.
@@ -95,13 +190,15 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
         for (size_t i = 0; i < contours.size(); i++) {
-		// Traiter uniquement les rectangles;
-		std::vector<cv::Point> poly;
-		cv::approxPolyDP(contours[i], poly, 100, true /* closed */);
-
-		if (explain)
+		std::vector<cv::Point> poly = approximate_rectangle(contours[i]);
+		if (explain) {
+			std::vector<cv::Point> hull;
+			cv::convexHull(contours[i], hull);
+			cv::polylines(drawing, hull, true, cv::Scalar(255, 0, 0), 6);
 			cv::polylines(drawing, poly, true, poly.size() == 4 ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255), 3);
+		}
 
+		// Traiter uniquement les rectangles;
 		if (poly.size() != 4)
 			continue;
 
