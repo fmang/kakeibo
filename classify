@@ -4,11 +4,8 @@ import numpy as np
 import pickle
 import sys
 
-with open('model', 'rb') as f:
-	model = pickle.load(f)
-
-with open('labels', 'rb') as f:
-	label_encoder = pickle.load(f)
+with open('letters.model', 'rb') as f:
+	label_encoder, model = pickle.load(f)
 
 def decode():
 	for line in sys.stdin:

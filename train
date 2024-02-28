@@ -32,11 +32,8 @@ def main():
 	predicted = model.predict(x_test)
 	print(sklearn.metrics.classification_report(y_test, predicted))
 
-	with open('model', 'wb') as f:
-		pickle.dump(model, f)
-
-	with open('labels', 'wb') as f:
-		pickle.dump(label_encoder, f)
+	with open('letters.model', 'wb') as f:
+		pickle.dump((label_encoder, model), f)
 
 if __name__ == '__main__':
 	main()
