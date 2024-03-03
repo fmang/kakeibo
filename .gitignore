@@ -1,5 +1,5 @@
 *.o
+__pycache__
 
+/build
 /extracted
-/photos
-/src/kakeibo
