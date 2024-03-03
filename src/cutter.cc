@@ -25,6 +25,10 @@
 #include <cassert>
 #include <optional>
 
+/**
+ * Reçoit un contour contenant 4 points et réordonne les points dans le sens
+ * horaire, en commençant par le coin haut-gauche.
+ */
 quad::quad(const std::vector<cv::Point>& points)
 {
 	assert(points.size() == 4);
@@ -52,7 +56,7 @@ int quad::width() const
 	return (cv::norm(corners[0] - corners[1]) + cv::norm(corners[2] - corners[3])) / 2;
 }
 
-void shrink_segment(cv::Point& a, cv::Point& b, int border)
+static void shrink_segment(cv::Point& a, cv::Point& b, int border)
 {
 	cv::Point m = (a + b) / 2;
 	double distance = cv::norm(a - b);
@@ -155,6 +159,9 @@ static std::vector<cv::Point> approximate_rectangle(const std::vector<cv::Point>
 	return corners;
 }
 
+/**
+ * Renvoie la liste des countours des reçus trouvés.
+ */
 std::vector<quad> find_receipts(cv::Mat source)
 {
 	// Résultat.
@@ -210,6 +217,11 @@ std::vector<quad> find_receipts(cv::Mat source)
 	return receipts;
 }
 
+/**
+ * Reçoit une image et un des countours trouvés par find_receipts, puis découpe
+ * le reçu en question. L’image est recadrée et sa perspective corrigée pour
+ * faire 600 px de large, soit une résolution d’environ 10 px / mm.
+ */
 cv::Mat cut_receipt(cv::Mat source, quad q)
 {
 	// Conversion du contour en 4 Point2f pour getPerspectiveTransform.

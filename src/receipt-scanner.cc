@@ -9,7 +9,9 @@
 #include <getopt.h>
 #include <set>
 
+/** Si activé via --explain, affiche visuellement les données traitées. */
 bool explain = false;
+
 char mode = 0;
 
 static const char* usage = \
@@ -100,6 +102,10 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+/**
+ * Enregistre l’image dans un fichier extracted/0123.png. Renvoie le nom du
+ * fichier de sortie.
+ */
 std::string save(cv::Mat image)
 {
 	static bool extracted_directory_created = false;
@@ -116,6 +122,15 @@ std::string save(cv::Mat image)
 	return output_file;
 }
 
+/**
+ * Ouvre une fenêtre affichant l’image. Au plus une image à la fois est
+ * affichée. Attend que l’utilisateur appuie sur une touche pour passer à
+ * l’image suivante. Si l’utilisateur appuie sur une autre touche qu’Espace,
+ * toutes les demandes d’affichage successives de la même image seront
+ * ignorées.
+ *
+ * Nécessite --explain pour être activée.
+ */
 void show(const std::string& name, cv::Mat image)
 {
 	if (!explain)
