@@ -29,4 +29,4 @@ cv::Mat cut_receipt(cv::Mat photo, quad contour);
 
 void scan_receipt(cv::Mat photo);
 void extract_samples(cv::Mat photo);
-void compile_features();
+void compile_features(const char *samples_path);

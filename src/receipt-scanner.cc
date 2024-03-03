@@ -18,7 +18,7 @@ static const char* usage = \
 	"Usage: receipt-scanner --cut FICHIER…\n"
 	"       receipt-scanner --scan FICHIER…\n"
 	"       receipt-scanner --extract FICHIER…\n"
-	"       receipt-scanner --compile\n"
+	"       receipt-scanner --compile DOSSIER\n"
 ;
 
 static struct option options[] = {
@@ -92,7 +92,12 @@ int main(int argc, char** argv)
 		break;
 
 	case 'C':
-		compile_features();
+		if (optind == argc)
+			bad_usage("Un dossier d’échantillons est requis.\n");
+		else if (argc - optind > 1)
+			bad_usage("Trop d’arguments.\n");
+
+		compile_features(argv[optind]);
 		break;
 
 	default:

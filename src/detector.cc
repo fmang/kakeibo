@@ -270,9 +270,9 @@ static features load_features(const std::filesystem::path& path)
  * Fouille toutes les images du dossier samples/ et bâtit un CSV pour entrainer
  * le modèle de reconnaissance de lettres.
  */
-void compile_features()
+void compile_features(const char* path)
 {
-	for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator("samples")) {
+	for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(path)) {
 		if (!entry.is_regular_file())
 			continue;
 
