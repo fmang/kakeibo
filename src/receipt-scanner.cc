@@ -13,10 +13,10 @@ bool explain = false;
 char mode = 0;
 
 static const char* usage = \
-	"Usage: kakeibo --cut FICHIER…\n"
-	"       kakeibo --scan FICHIER…\n"
-	"       kakeibo --extract FICHIER…\n"
-	"       kakeibo --compile\n"
+	"Usage: receipt-scanner --cut FICHIER…\n"
+	"       receipt-scanner --scan FICHIER…\n"
+	"       receipt-scanner --extract FICHIER…\n"
+	"       receipt-scanner --compile\n"
 ;
 
 static struct option options[] = {
