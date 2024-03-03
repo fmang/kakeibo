@@ -155,10 +155,10 @@ static std::vector<cv::Point> approximate_rectangle(const std::vector<cv::Point>
 	return corners;
 }
 
-std::vector<cv::Mat> cut_receipts(cv::Mat source)
+std::vector<quad> find_receipts(cv::Mat source)
 {
 	// Résultat.
-	std::vector<cv::Mat> receipts;
+	std::vector<quad> receipts;
 
 	// Sélectionne uniquement les pixels clairs avec une saturation quasi-nulle.
 	cv::Mat image;
@@ -201,24 +201,30 @@ std::vector<cv::Mat> cut_receipts(cv::Mat source)
 		// Élimine un peu de bordure car il s’agit souvent d’ombre.
 		q.shrink(h * 0.005);
 
-		// Conversion du contour en 4 Point2f pour getPerspectiveTransform.
-		std::vector<cv::Point2f> old_rect;
-		std::transform(q.corners.begin(), q.corners.end(), std::back_inserter(old_rect), [] (cv::Point p) { return p; });
-
-		// Calcul de la taille de l’image extraite. On force largeur et préserve le ratio.
-		float new_width = 600;
-		float new_height = h * new_width / w;
-		std::vector<cv::Point2f> new_rect = { {0, 0}, {new_width, 0}, {new_width, new_height}, {0, new_height} };
-
-		// Extraction du reçu par transformation de perspective.
-		cv::Mat extracted_receipt;
-		cv::Mat transform = cv::getPerspectiveTransform(old_rect, new_rect);
-		cv::warpPerspective(source, extracted_receipt, transform, cv::Size(new_width, new_height));
-		receipts.push_back(extracted_receipt);
+		receipts.push_back(q);
 	}
 
 	if (explain)
 		show("contours", drawing);
 
 	return receipts;
+}
+
+cv::Mat cut_receipt(cv::Mat source, quad q)
+{
+	// Conversion du contour en 4 Point2f pour getPerspectiveTransform.
+	std::vector<cv::Point2f> old_rect;
+	std::transform(q.corners.begin(), q.corners.end(), std::back_inserter(old_rect), [] (cv::Point p) { return p; });
+
+	// Calcul de la taille de l’image extraite. On force largeur et préserve le ratio.
+	float new_width = 600;
+	float new_height = q.height() * new_width / q.width();
+	std::vector<cv::Point2f> new_rect = { {0, 0}, {new_width, 0}, {new_width, new_height}, {0, new_height} };
+
+	// Extraction du reçu par transformation de perspective.
+	cv::Mat extracted_receipt;
+	cv::Mat transform = cv::getPerspectiveTransform(old_rect, new_rect);
+	cv::warpPerspective(source, extracted_receipt, transform, cv::Size(new_width, new_height));
+
+	return extracted_receipt;
 }

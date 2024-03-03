@@ -66,8 +66,10 @@ int main(int argc, char** argv)
 		for (int argi = optind; argi < argc; ++argi) {
 			const char* image_path = argv[argi];
 			cv::Mat source = cv::imread(image_path, cv::IMREAD_COLOR);
-			for (auto receipt : cut_receipts(source))
+			for (auto contour : find_receipts(source)) {
+				cv::Mat receipt = cut_receipt(source, contour);
 				std::puts(save(receipt).c_str());
+			}
 		}
 		break;
 

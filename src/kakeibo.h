@@ -8,16 +8,26 @@
 #include <vector>
 
 /**
- * Mode d’opération :
- * - c : Découpe les reçus présents sur une photo.
- * - x : Extrait les fragments intéressantes d’un reçu.
- */
-extern char mode;
-
-/**
  * Si activé via --explain, affiche visuellement les données traitées.
  */
 extern bool explain;
+
+/**
+ * Ouvre une fenêtre affichant l’image. Au plus une image à la fois est
+ * affichée. Attend que l’utilisateur appuie sur une touche pour passer à
+ * l’image suivante. Si l’utilisateur appuie sur une autre touche qu’Espace,
+ * toutes les demandes d’affichage successives de la même image seront
+ * ignorées.
+ *
+ * Nécessite --explain pour être activée.
+ */
+void show(const std::string& name, cv::Mat image);
+
+/**
+ * Enregistre l’image dans un fichier extracted/0123.png. Renvoie le nom du
+ * fichier de sortie.
+ */
+std::string save(cv::Mat image);
 
 /**
  * Reçoit un contour contenant 4 points et réordonne les points dans le sens
@@ -33,28 +43,16 @@ struct quad {
 };
 
 /**
- * Reçoit une image et renvoie la liste des reçus extraits. Chaque reçu est
- * recadré pour rentrer dans un rectangle droit de 600 px de large pour une
- * résolution d’environ 10 px / mm.
+ * Renvoie la liste des countours des reçus trouvés.
  */
-std::vector<cv::Mat> cut_receipts(cv::Mat photo);
+std::vector<quad> find_receipts(cv::Mat photo);
 
 /**
- * Enregistre l’image dans un fichier extracted/0123.png. Renvoie le nom du
- * fichier de sortie.
+ * Reçoit une image et un des countours trouvés par find_receipts, puis découpe
+ * le reçu en question. L’image est recadrée et sa perspective corrigée pour
+ * faire 600 px de large, soit une résolution d’environ 10 px / mm.
  */
-std::string save(cv::Mat image);
-
-/**
- * Ouvre une fenêtre affichant l’image. Au plus une image à la fois est
- * affichée. Attend que l’utilisateur appuie sur une touche pour passer à
- * l’image suivante. Si l’utilisateur appuie sur une autre touche qu’Espace,
- * toutes les demandes d’affichage successives de la même image seront
- * ignorées.
- *
- * Nécessite --explain pour être activée.
- */
-void show(const std::string& name, cv::Mat image);
+cv::Mat cut_receipt(cv::Mat photo, quad contour);
 
 /**
  * Extrait les informations d’un reçu.
