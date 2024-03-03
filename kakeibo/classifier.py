@@ -71,6 +71,9 @@ def decode(model):
 	"""
 	for line in sys.stdin:
 		words = [[float(c) / 9 for c in word] for word in line.split()]
+		if not words:
+			print()
+			continue
 		x = np.array(words)
 		prediction = model.classifier.predict(x)
 		letters = model.label_encoder.inverse_transform(prediction)
