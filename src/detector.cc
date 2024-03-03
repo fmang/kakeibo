@@ -1,9 +1,18 @@
 /*
- * Reçoit la photo d’un ticket de caisse en entrée et détecte ses éléments :
- * zones de texte, ligne du total, montant, ainsi que la date à travers les
- * chiffres ou encore depuis le code barre.
+ * Reçoit la photo d’un ticket de caisse et en extrait les lignes de texte,
+ * puis chaque lettre dans ces lignes. Chaque lettre est appelée échantillon
+ * vis-à-vis de l’algorithme de classification. On extrait ensuite les features
+ * de chaque échantillon sous forme textuelle pour servir d’entrée au module
+ * kakeibo.classifier.
  *
- * On suppose une résolution de 10 px / mm.
+ * Avec --extract, on enregistre chaque lettre découpée en image individuelle.
+ * Ces images groupées en dossier, --compile permet de générer un CSV servant à
+ * l’apprentissage. Enfin, --scan sort sous forme textuelle les features de
+ * toutes les lettres trouvées. Chaque ligne de texte est une ligne du reçu, et
+ * chaque mot (features) est une lettre.
+ *
+ * Toute la partie apprentissage machine est hors de ce module. On s’occupe ici
+ * uniquement du découpage des lettres et le l’extraction des features.
  */
 
 #include "kakeibo.h"
@@ -133,7 +142,7 @@ static void merge_text_lines(text_line& base, text_line& extra)
 }
 
 /**
- * Renvoie le nombre de pixels de superposition sur la projection horizontale
+ * Renvoie le nombre de pixels de superposition sur la projection verticale
  * des deux lignes. S’il est négatif, il n’y a aucune superposition.
  */
 static int vertical_overlap(const text_line& a, const text_line& b)
@@ -202,7 +211,8 @@ static std::string extract_features(cv::Mat sample)
 }
 
 /**
- * Extrait les informations d’un reçu.
+ * Extrait les lettres d’un reçu et écrit sur la sortie standard le contenu du
+ * reçu en forme textuelle pour servir d’entrée à kakeibo.classifier --decode.
  */
 void scan_receipt(cv::Mat source)
 {
@@ -229,7 +239,7 @@ void scan_receipt(cv::Mat source)
 /**
  * Extrait dans pleins de petits fichiers chaque lettre contenu dans le reçu.
  * Ces images sont destinées à servir d’échantillons pour le moteur de
- * reconnaissance de glyphes.
+ * reconnaissance de lettres.
  */
 void extract_samples(cv::Mat source)
 {
@@ -244,7 +254,7 @@ void extract_samples(cv::Mat source)
 
 /**
  * Représente un échantillon stocké dans le dossier samples/, prétraité pour
- * servir à l’entrainement du modèle de reconnaissance de lettre.
+ * servir à l’entrainement du modèle de reconnaissance de lettres.
  */
 struct features {
 	std::string path;
@@ -267,8 +277,9 @@ static features load_features(const std::filesystem::path& path)
 }
 
 /**
- * Fouille toutes les images du dossier samples/ et bâtit un CSV pour entrainer
- * le modèle de reconnaissance de lettres.
+ * Fouille toutes les images du dossier passé en argument et bâtit un CSV pour
+ * entrainer le modèle de reconnaissance de lettres. Ce format est accepté par
+ * kakeibo.classifier --train.
  */
 void compile_features(const char* path)
 {
