@@ -214,6 +214,14 @@ std::vector<quad> find_receipts(cv::Mat source)
 	if (explain)
 		show("contours", drawing);
 
+	// Trie les reçus de gauche à droite (forte préférence), puis de haut
+	// au bas. On tolère qu’un reçu soit un peu décalé à gauche s’il est
+	// bien en-dessous.
+	auto left_of = [](const quad& a, const quad& b) {
+		return a.corners[0].x * 3 + b.corners[0].y < b.corners[0].x * 3 + b.corners[0].y;
+	};
+	std::sort(receipts.begin(), receipts.end(), left_of);
+
 	return receipts;
 }
 
