@@ -170,11 +170,11 @@ std::vector<quad> find_receipts(cv::Mat source)
 	// Sélectionne uniquement les pixels clairs avec une saturation quasi-nulle.
 	cv::Mat image;
 	cv::cvtColor(source, image, cv::COLOR_BGR2HSV);
-	cv::inRange(image, cv::Scalar(0, 0, 128), cv::Scalar(255, 32, 255), image);
+	cv::inRange(image, cv::Scalar(0, 0, 128), cv::Scalar(255, 16, 255), image);
 
-	// Dilatation pour que les bords fragiles se solidifient.
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-	cv::dilate(image, image, element);
+	// Opening pour ne pas que le bruit nous génère des contours parasites.
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
+	cv::morphologyEx(image, image, cv::MORPH_OPEN, element);
 	show("shapes", image);
 
 	cv::Mat drawing;
