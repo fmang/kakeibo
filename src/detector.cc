@@ -163,7 +163,10 @@ static void compact_lines(std::vector<text_line>& lines)
 
 	// Trie sur y, de haut en bas.
 	auto above = [](const text_line& a, const text_line& b) {
-		return a.box.y < b.box.y;
+		// Si deux blocs ont pratiquement le même y, on trie sur x.
+		// L’algorithme ci-dessous n’apprécie pas que les blocs d’une
+		// même ligne soient mal ordonnés.
+		return a.box.y * 30 + a.box.x < b.box.y * 30 + b.box.x;
 	};
 	std::sort(lines.begin(), lines.end(), above);
 
