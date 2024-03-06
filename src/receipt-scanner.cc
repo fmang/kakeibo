@@ -26,6 +26,7 @@ static const char* help =
 	"       --cut           Découpe les reçus contenus dans l’image.\n"
 	"       --scan          Sort le contenu du reçu sous forme textuelle.\n"
 	"       --extract       Extrait chaque lettre du reçu en image indivuelle.\n"
+	"       --extract=logo  Extrait le logo du reçu.\n"
 	"       --compile       Compile une collection d’échantillons en CSV.\n"
 	"       --help          Affiche cette aide.\n"
 	"\n"
@@ -45,7 +46,7 @@ static const char* help =
 static struct option options[] = {
 	{ "cut", no_argument, 0, 'c' },
 	{ "scan", no_argument, 0, 's' },
-	{ "extract", no_argument, 0, 'x' },
+	{ "extract", optional_argument, 0, 'x' },
 	{ "compile", no_argument, 0, 'C' },
 	{ "explain", no_argument, 0, 'e' },
 	{ "help", no_argument, 0, 'h' },
@@ -81,7 +82,11 @@ static void process_receipt(cv::Mat receipt)
 		break;
 
 	case 'x':
-		extract_samples(receipt);
+		extract_letters(receipt);
+		break;
+
+	case 'l':
+		extract_logo(receipt);
 		break;
 	}
 
@@ -104,6 +109,16 @@ int main(int argc, char** argv)
 			if (mode != 0)
 				bad_usage("Le mode ne peut être spécifié qu’une fois.\n");
 			mode = c;
+
+			// --extract reçoit optionnellement une valeur pour
+			// extraire le logo à la place des lettres.
+			if (mode == 'x') {
+				if (optarg && strcmp(optarg, "logo") == 0)
+					mode = 'l';
+				else if (optarg && strcmp(optarg, "letters") != 0)
+					bad_usage("Mode d’extraction inconnu.\n");
+			}
+
 			break;
 		case 'e':
 			explain = true;
@@ -124,13 +139,14 @@ int main(int argc, char** argv)
 		cut = true;
 	}
 
-	if (cut && !(mode == 'c' || mode == 's' || mode == 'x'))
+	if (cut && !(mode == 'c' || mode == 's' || mode == 'x' || mode == 'l'))
 		bad_usage("--cut n’est pas compatible avec le mode spécifié.\n");
 
 	switch(mode) {
 	case 'c':
 	case 's':
 	case 'x':
+	case 'l':
 		if (optind == argc)
 			bad_usage("Aucun fichier à traiter.\n");
 

@@ -28,5 +28,6 @@ cv::Mat cut_receipt(cv::Mat photo, quad contour);
 // detector.cc
 
 void scan_receipt(cv::Mat photo);
-void extract_samples(cv::Mat photo);
+void extract_letters(cv::Mat photo);
+void extract_logo(cv::Mat photo);
 void compile_features(const char *samples_path);

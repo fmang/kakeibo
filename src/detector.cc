@@ -105,10 +105,10 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 }
 
 /**
- * Affiche pour le debug l’image source avec les lettres encadrées. Les lettres
+ * Dessine sur la photo source les countours des lettres encadrés. Les lettres
  * d’une même ligne seront de la même couleur.
  */
-static void show_text_lines(cv::Mat source, const std::vector<text_line> lines)
+static void draw_text_lines(cv::Mat drawing, const std::vector<text_line> lines)
 {
 	static std::vector<cv::Scalar> colors = {
 		cv::Scalar(255, 0, 0),
@@ -119,13 +119,11 @@ static void show_text_lines(cv::Mat source, const std::vector<text_line> lines)
 		cv::Scalar(0, 128, 128),
 	};
 	int color_index = 0;
-	cv::Mat drawing = source.clone();
 	for (const text_line& line : lines) {
 		cv::Scalar color = colors[++color_index % colors.size()];
 		for (const cv::Rect& letter : line.letters)
 			cv::rectangle(drawing, letter.tl(), letter.br(), color, 1);
 	}
-	show("Text lines", drawing);
 }
 
 /**
@@ -183,6 +181,41 @@ static void compact_lines(std::vector<text_line>& lines)
 	lines = std::move(compacted_lines);
 }
 
+/**
+ * Reçoit un reçu extrait blanc sur noir et cherche ce qui est le plus
+ * vraisemblablement le logo. Renvoie un rectangle vide en cas d’échec, et
+ * sinon la zone intéressante de l’image.
+ */
+cv::Rect find_logo(cv::Mat binary)
+{
+	cv::Mat dilated;
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(19, 1));
+	cv::morphologyEx(binary, dilated, cv::MORPH_CLOSE, element);
+
+	cv::Rect best_candidate;
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(dilated, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	for (auto& contour : contours) {
+		cv::Rect box = cv::boundingRect(contour);
+		if (box.area() < 1000) // Un logo doit faire au moins 10 mm².
+			continue;
+
+		// Le logo doit être au moins à quelques millimètres des bords
+		// pour exclure les countours causés par les ombres. Il doit
+		// aussi être dans la moitié supérieure du logo.
+		static const int min_border = 10;
+		if (box.x < min_border || box.y < min_border ||
+		    binary.cols - box.width - box.x < min_border ||
+		    box.y + box.height > binary.rows / 2)
+			continue;
+
+		if (box.height > best_candidate.height)
+			best_candidate = box;
+	}
+
+	return best_candidate;
+}
+
 static cv::Mat binarize(cv::Mat color)
 {
 	// Extrait le rouge pour rendre les tampons moins visibles. Les tickets
@@ -222,8 +255,15 @@ void scan_receipt(cv::Mat source)
 	cv::Mat binary = binarize(source);
 	std::vector<text_line> lines = extract_text_lines(binary);
 	compact_lines(lines);
-	if (explain)
-		show_text_lines(source, lines);
+
+	if (explain) {
+		cv::Mat drawing = source.clone();
+		draw_text_lines(drawing, lines);
+		cv::Rect logo = find_logo(binary);
+		if (!logo.empty())
+			cv::rectangle(drawing, logo, cv::Scalar(0, 128, 255), 5);
+		show("detection", drawing);
+	}
 
 	for (const text_line& line : lines) {
 		bool first = true;
@@ -244,7 +284,7 @@ void scan_receipt(cv::Mat source)
  * Ces images sont destinées à servir d’échantillons pour le moteur de
  * reconnaissance de lettres.
  */
-void extract_samples(cv::Mat source)
+void extract_letters(cv::Mat source)
 {
 	cv::Mat binary = binarize(source);
 	std::vector<text_line> lines = extract_text_lines(binary);
@@ -253,6 +293,14 @@ void extract_samples(cv::Mat source)
 		for (const cv::Rect& letter : line.letters)
 			save(binary(letter));
 	}
+}
+
+void extract_logo(cv::Mat source)
+{
+	cv::Mat binary = binarize(source);
+	cv::Rect logo = find_logo(binary);
+	if (!logo.empty())
+		save(binary(logo));
 }
 
 /**
