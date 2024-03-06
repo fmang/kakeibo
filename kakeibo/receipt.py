@@ -7,11 +7,11 @@ import subprocess
 import sys
 import re
 
-from kakeibo.classifier import Model, decode
+import kakeibo.classifier
 
 
 DATE_REGEX = re.compile(r'(\d{4})[年／](\d{1,2})[月／](\d{1,2})')
-TOTAL_REGEX = re.compile(r'^合(?:計|言十).*￥(\d+)', re.MULTILINE)
+TOTAL_REGEX = re.compile(r'^合(?:計|言十).*￥(\d+)$', re.MULTILINE)
 
 
 def parse_receipt(text):
@@ -30,7 +30,7 @@ def scan_pictures(*pictures_paths):
 
 	decoded_io = io.StringIO()
 	with subprocess.Popen(['receipt-scanner', '--', *pictures_paths], stdout=subprocess.PIPE, text=True) as scanner:
-		decode(model, input=scanner.stdout, output=decoded_io)
+		kakeibo.classifier.decode(model, input=scanner.stdout, output=decoded_io)
 
 	text = decoded_io.getvalue()
 	return [receipt for text_block in text.split('\n\n') if (receipt := parse_receipt(text_block))]

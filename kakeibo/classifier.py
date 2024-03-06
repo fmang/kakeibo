@@ -31,10 +31,6 @@ import sklearn.svm
 import sys
 
 
-"""Représente le contenu d’un fichier de modèle."""
-Model = collections.namedtuple('Model', 'label_encoder classifier')
-
-
 def load_data():
 	"""Charge depuis l’entrée standard le CSV des échantillons."""
 	x = []
@@ -61,7 +57,7 @@ def train(test_ratio=0):
 	if test_ratio != 0:
 		predicted = classifier.predict(x_test)
 		print(sklearn.metrics.classification_report(y_test, predicted))
-	return Model(label_encoder, classifier)
+	return (label_encoder, classifier)
 
 
 def decode(model, input, output):
@@ -69,14 +65,15 @@ def decode(model, input, output):
 	Reçoit depuis l’io d’entrée des jeux de features (« mots ») séparés
 	par des blancs, et remplace chaque mot par la lettre identifiée.
 	"""
+	label_encoder, classifier = model
 	for line in input:
 		words = [[float(c) / 9 for c in word] for word in line.split()]
 		if not words:
 			print(file=output)
 			continue
 		x = np.array(words)
-		prediction = model.classifier.predict(x)
-		letters = model.label_encoder.inverse_transform(prediction)
+		prediction = classifier.predict(x)
+		letters = label_encoder.inverse_transform(prediction)
 		print(''.join(letters), file=output)
 
 
