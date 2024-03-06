@@ -56,7 +56,7 @@ def train(test_ratio=0):
 	classifier.fit(x_train, y_train)
 	if test_ratio != 0:
 		predicted = classifier.predict(x_test)
-		print(sklearn.metrics.classification_report(y_test, predicted))
+		print(sklearn.metrics.classification_report(y_test, predicted, target_names=label_encoder.classes_))
 	return (label_encoder, classifier)
 
 
