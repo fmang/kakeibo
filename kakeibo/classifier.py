@@ -64,20 +64,20 @@ def train(test_ratio=0):
 	return Model(label_encoder, classifier)
 
 
-def decode(model):
+def decode(model, input, output):
 	"""
-	Reçoit sur l’entrée standard des jeux de features (« mots ») séparés
+	Reçoit depuis l’io d’entrée des jeux de features (« mots ») séparés
 	par des blancs, et remplace chaque mot par la lettre identifiée.
 	"""
-	for line in sys.stdin:
+	for line in input:
 		words = [[float(c) / 9 for c in word] for word in line.split()]
 		if not words:
-			print()
+			print(file=output)
 			continue
 		x = np.array(words)
 		prediction = model.classifier.predict(x)
 		letters = model.label_encoder.inverse_transform(prediction)
-		print(''.join(letters))
+		print(''.join(letters), file=output)
 
 
 def parse_args():
@@ -117,4 +117,4 @@ if __name__ == '__main__':
 	else:
 		with open(args.model, 'rb') as f:
 			model = pickle.load(f)
-		decode(model)
+		decode(model, input=sys.stdin, output=sys.stdout)
