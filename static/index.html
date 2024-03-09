@@ -10,4 +10,39 @@
 	<input type="file" name="picture" id="picture-selector" accept="image/*" capture="environment" />
 </form>
 
+<form method="post" action="api/send">
+	<table>
+		<tr>
+		<th>日付</th>
+		<td>
+			<input type="date" />
+			<input type="button" value="今日" />
+		</td>
+
+		<tr>
+		<th>金額</th>
+		<td><input type="number" /></td>
+
+		<tr>
+		<th>備考</th>
+		<td><input type="text" /></td>
+
+		<tr>
+		<th>部類</th>
+		<td>
+			<ul>
+				<li> 食料
+				<li> 美食
+				<li> 薬
+				<li> 家
+				<li> 旅行
+				<li> 代
+				<li> 給料
+				<li> 送金
+				<li> その他
+			</ul>
+		</td>
+	</table>
+</form>
+
 <script src="ui.js"></script>
