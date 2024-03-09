@@ -2,4 +2,12 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
 <link rel="manifest" href="manifest.json" />
-Bonjour !
+<link rel="stylesheet" href="style.css" />
+
+<form method="post" action="api/picture">
+	<input type="button" id="select-picture-button" value="アップロード" />
+	<input type="button" id="take-picture-button" class="primary" value="撮影" />
+	<input type="file" name="picture" id="picture-selector" accept="image/*" capture="environment" />
+</form>
+
+<script src="ui.js"></script>

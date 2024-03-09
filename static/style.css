@@ -1,0 +1,19 @@
+body {
+	font-size: 20px;
+}
+
+#picture-selector {
+	display: none;
+}
+
+input[type="button"] {
+	font-size: 1em;
+	background-color: lightgray;
+	color: black;
+	border: none;
+	padding: 0.5em;
+}
+
+input[type="button"].primary {
+	background-color: mediumseagreen;
+}
