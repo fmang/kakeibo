@@ -61,7 +61,7 @@ static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
 	cv::findContours(extract, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect letter = cv::boundingRect(contour);
-		if (letter.area() < 100) // Ignore le bruit.
+		if (letter.width < 15 && letter.height < 15) // Ignore le bruit.
 			continue;
 
 		letter.x += line_box.x - dilatation.width;
@@ -97,7 +97,10 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 		if (box.area() < 50) // Ignore le bruit.
 			continue;
 		text_line line = extract_text_line(binary, box);
-		if (!line.letters.empty())
+		// Les lignes avec une seule lettre sont vraisemblablement du
+		// bruit, ou un morceau de lettre qui n’a pas été attrapé dans
+		// le contour de la ligne.
+		if (line.letters.size() >= 2)
 			lines.push_back(line);
 	}
 

@@ -148,7 +148,7 @@ static std::vector<cv::Point> approximate_rectangle(const std::vector<cv::Point>
 			corners.push_back(corner);
 			candidate_a = a;
 			candidate_b = b;
-		} else if (cos > 0.8) {
+		} else if (cos > 0.95) {
 			// La ligne continue, donc on prolonge le candidat.
 			candidate_b = b;
 		} else {
