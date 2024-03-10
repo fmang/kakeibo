@@ -86,7 +86,7 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 {
 	// La dilatation horizontale permet de rassembler les lignes dans un même contour.
 	cv::Mat dilated;
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(19, 1));
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(19, 5));
 	cv::morphologyEx(binary, dilated, cv::MORPH_CLOSE, element);
 
 	std::vector<text_line> lines;
@@ -96,12 +96,18 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 		cv::Rect box = cv::boundingRect(contour);
 		if (box.area() < 50) // Ignore le bruit.
 			continue;
+
 		text_line line = extract_text_line(binary, box);
+		if (line.letters.empty())
+			continue;
+
 		// Les lignes avec une seule lettre sont vraisemblablement du
 		// bruit, ou un morceau de lettre qui n’a pas été attrapé dans
 		// le contour de la ligne.
-		if (line.letters.size() >= 2)
-			lines.push_back(line);
+		if (line.letters.size() == 1 && line.letters[0].area() < 200)
+			continue;
+
+		lines.push_back(line);
 	}
 
 	return lines;
@@ -167,7 +173,7 @@ static void compact_lines(std::vector<text_line>& lines)
 		// Si deux blocs ont pratiquement le même y, on trie sur x.
 		// L’algorithme ci-dessous n’apprécie pas que les blocs d’une
 		// même ligne soient mal ordonnés.
-		return a.box.y * 30 + a.box.x < b.box.y * 30 + b.box.x;
+		return a.box.y * 20 + a.box.x < b.box.y * 20 + b.box.x;
 	};
 	std::sort(lines.begin(), lines.end(), above);
 
@@ -226,7 +232,7 @@ static cv::Mat binarize(cv::Mat color)
 	cv::Mat binary;
 	cv::extractChannel(color, binary, 2); // Canal rouge.
 	cv::bitwise_not(binary, binary); // Blanc sur noir.
-	cv::adaptiveThreshold(binary, binary, 255, cv::THRESH_BINARY, cv::ADAPTIVE_THRESH_MEAN_C, 75, -50);
+	cv::adaptiveThreshold(binary, binary, 255, cv::THRESH_BINARY, cv::ADAPTIVE_THRESH_MEAN_C, 75, -30);
 	return binary;
 }
 

@@ -11,7 +11,10 @@ import kakeibo.classifier
 
 
 DATE_REGEX = re.compile(r'(\d{4})[年／・](\d{1,2})[月／・](\d{1,2})')
-TOTAL_REGEX = re.compile(r'^合(?:計|言十).*￥([\d・]+)$', re.MULTILINE)
+
+# 言偏 est un peu difficile à lire par sa complexité, mais il est peu probable
+# qu’on se trouve sur le +, ou qu’une autre lettre vienne s’intercaler.
+TOTAL_REGEX = re.compile(r'^合(?:計|言十|�十).*￥([\d・]+)$', re.MULTILINE)
 
 
 def parse_receipt(text):
@@ -45,6 +48,7 @@ if __name__ == '__main__':
 
 	if args.format == 'json':
 		json.dump(receipts, sys.stdout, indent='\t')
+		print()
 	elif args.format == 'tsv':
 		for r in receipts:
 			print(f"%s\t%s" % (r.get('date', ''), r.get('total', '')))
