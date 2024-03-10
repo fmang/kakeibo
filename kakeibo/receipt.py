@@ -38,7 +38,13 @@ def scan_pictures(*pictures_paths):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--format', choices=['json', 'tsv'], default='json')
 	parser.add_argument('pictures', metavar='PICTURE', nargs='+')
 	args = parser.parse_args()
 	receipts = scan_pictures(*args.pictures)
-	json.dump(receipts, sys.stdout, indent='\t')
+
+	if args.format == 'json':
+		json.dump(receipts, sys.stdout, indent='\t')
+	elif args.format == 'tsv':
+		for r in receipts:
+			print(f"%s\t%s" % (r.get('date', ''), r.get('total', '')))
