@@ -61,7 +61,7 @@ static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
 	cv::findContours(extract, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
 		cv::Rect letter = cv::boundingRect(contour);
-		if (letter.width < 15 && letter.height < 15) // Ignore le bruit.
+		if (letter.width < 10 && letter.height < 10) // Ignore le bruit.
 			continue;
 
 		letter.x += line_box.x - dilatation.width;
@@ -237,6 +237,18 @@ static cv::Mat binarize(cv::Mat color)
 static std::string extract_features(cv::Mat sample)
 {
 	std::string word;
+
+	// La première feature représente l’aspect. 4-5 représente une image
+	// plutôt carrée. 9 représente une image très large, et 1 une image
+	// très étroite.
+	float aspect = (float) sample.cols / sample.rows;
+	int aspect_feature = aspect > 1 ? 4 + aspect : 5 - 1 / aspect;
+	if (aspect_feature < 0)
+		aspect_feature = 0;
+	else if (aspect_feature > 9)
+		aspect_feature = 9;
+	word.push_back('0' + aspect_feature);
+
 	cv::Mat pixels;
 	cv::resize(sample, pixels, cv::Size(8, 8));
 	for (int y = 0; y < pixels.rows; ++y) {
