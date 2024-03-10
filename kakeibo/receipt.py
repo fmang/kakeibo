@@ -10,8 +10,8 @@ import re
 import kakeibo.classifier
 
 
-DATE_REGEX = re.compile(r'(\d{4})[年／ー](\d{1,2})[月／ー](\d{1,2})')
-TOTAL_REGEX = re.compile(r'^合(?:計|言十).*￥([\d，]+)$', re.MULTILINE)
+DATE_REGEX = re.compile(r'(\d{4})[年／・](\d{1,2})[月／・](\d{1,2})')
+TOTAL_REGEX = re.compile(r'^合(?:計|言十).*￥([\d・]+)$', re.MULTILINE)
 
 
 def parse_receipt(text):
@@ -19,7 +19,7 @@ def parse_receipt(text):
 	if (m := re.search(DATE_REGEX, text)):
 		data['date'] = '%d-%02d-%02d' % (int(m[1]), int(m[2]), int(m[3]))
 	if (m := re.search(TOTAL_REGEX, text)):
-		data['total'] = int(m[1].replace('，', ''))
+		data['total'] = int(m[1].replace('・', ''))
 	return data or None
 
 

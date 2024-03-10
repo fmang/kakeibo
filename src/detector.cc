@@ -237,18 +237,6 @@ static cv::Mat binarize(cv::Mat color)
 static std::string extract_features(cv::Mat sample)
 {
 	std::string word;
-
-	// La première feature représente l’aspect. 4-5 représente une image
-	// plutôt carrée. 9 représente une image très large, et 1 une image
-	// très étroite.
-	float aspect = (float) sample.cols / sample.rows;
-	int aspect_feature = aspect > 1 ? 4 + aspect : 5 - 1 / aspect;
-	if (aspect_feature < 0)
-		aspect_feature = 0;
-	else if (aspect_feature > 9)
-		aspect_feature = 9;
-	word.push_back('0' + aspect_feature);
-
 	cv::Mat pixels;
 	cv::resize(sample, pixels, cv::Size(8, 8));
 	for (int y = 0; y < pixels.rows; ++y) {
