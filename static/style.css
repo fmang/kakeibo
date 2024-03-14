@@ -1,8 +1,20 @@
 body {
 	font-size: 20px;
+	font-family: sans-serif;
 	max-width: 600px;
-	padding: 1em;
+	padding: 0.5em 0;
 	margin: auto;
+}
+
+header {
+	display: flex;
+	gap: 0.5em;
+	align-items: center;
+	margin: 0 0.5em;
+}
+header h1 {
+	flex-grow: 1;
+	margin: 0;
 }
 
 #picture-selector {
@@ -14,23 +26,23 @@ form table {
 	border-spacing: 0.5em;
 }
 form th { white-space: nowrap; }
-form td:has(input) { display: flex; gap: 1em; }
+form td:has(input) { display: flex; gap: 0.5em; }
 form td > input { flex-grow: 1; }
 form td > input[type="date"] + input[type="button"] { flex-grow: 0; }
 
 input {
 	font-size: 1em;
 	padding: 0.5em;
+	border-width: 0 0 .1em 0;
 }
 
-input[type="button"] {
-	background-color: lightgray;
-	color: black;
-	border: none;
+input.primary {
 }
 
-input[type="button"].primary {
-	background-color: mediumseagreen;
+input[type="image"] {
+	height: 1.6em;
+	border-radius: 100%;
+	border: 1px solid gray;
 }
 
 .categories {
@@ -39,16 +51,22 @@ input[type="button"].primary {
 	gap: 0.5em;
 	list-style-type: none;
 	padding: 0;
-	margin: 0;
+	margin: 0.5em 0;
 }
 
 .categories li {
+	flex-grow: 1;
+	text-align: center;
 	white-space: nowrap;
 	border-radius: 0.5em;
 	padding: 0.5em;
 }
 
-.categories .common { font-weight: bold; }
 .categories .expense { background-color: antiquewhite; }
 .categories .income { background-color: lavender; }
 .categories .transfer { background-color: lavender; }
+
+.actions {
+	display: flex;
+	justify-content: space-evenly;
+}

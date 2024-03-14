@@ -4,9 +4,14 @@
 <link rel="manifest" href="manifest.json" />
 <link rel="stylesheet" href="style.css" />
 
+<header>
+	<h1>家計簿</h1>
+	<input type="image" src="icons/history.svg" title="履歴" />
+	<input type="image" id="select-picture-button" src="icons/upload.svg" title="アップロード" />
+	<input type="image" id="take-picture-button" src="icons/camera.svg" class="primary" title="撮影" />
+</header>
+
 <form method="post" action="api/picture">
-	<input type="button" id="select-picture-button" value="アップロード" />
-	<input type="button" id="take-picture-button" class="primary" value="撮影" />
 	<input type="file" name="picture" id="picture-selector" accept="image/*" capture="environment" />
 </form>
 
@@ -21,29 +26,32 @@
 
 		<tr>
 		<th>金額</th>
-		<td><input type="number" /></td>
+		<td><input type="number" inputmode="numeric" /></td>
 
 		<tr>
 		<th>備考</th>
 		<td><input type="text" /></td>
 
 		<tr>
-		<th>部類</th>
-		<td>
+		<td colspan="2">
 			<ul class="categories">
-				<li class="common expense" data-value="Alimentaire"> 食料
-				<li class="common expense" data-value="Gastronomie"> 美食
-				<li class="common expense" data-value="Facture"> 勘定
-				<li class="expense" data-value="Pharmacie"> 薬
-				<li class="expense" data-value="Maison"> 家
-				<li class="expense" data-value="Voyage"> 旅行
+				<li class="expense" data-value="Alimentaire"> 食料雑貨
+				<li class="expense" data-value="Loisir"> 道楽
+				<li class="expense" data-value="Facture"> 勘定
 				<li class="expense" data-value="Autre"> その他
-				<li class="common income" data-value="Salaire"> 給料
+			</ul>
+			<ul class="categories">
+				<li class="income" data-value="Salaire"> 給料
 				<li class="income" data-value="Autre"> 収入
-				<li class="transfer" data-value="Transfert"> 送金
+				<li class="transfer" data-value="Transfert"> 振込
 			</ul>
 		</td>
 	</table>
+
+	<div class="actions">
+		<input type="image" src="icons/close-thick.svg" title="リセット" />
+		<input type="image" class="primary" src="icons/send.svg" title="送信" />
+	</div>
 </form>
 
 <script src="ui.js"></script>
