@@ -20,7 +20,6 @@ struct quad {
 	int height() const;
 	int width() const;
 	void shrink(int border);
-	void rectify();
 };
 
 std::vector<quad> find_receipts(cv::Mat photo);
