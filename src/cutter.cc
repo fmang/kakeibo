@@ -79,6 +79,29 @@ void quad::shrink(int border)
 }
 
 /**
+ * Transforme le quadrilatère en rectangle. L’idéal serait de trouver le plus
+ * grand rectangle contenu, mais partons plutôt sur une solution simpliste :
+ *
+ *   1. Calculer la plus petite distance centre—coin (demi-diagonale).
+ *   2. Redimensionner chaque demi-diagonale à cette longueur.
+ */
+void quad::rectify()
+{
+	cv::Point center = (corners[0] + corners[1] + corners[2] + corners[3]) / 4;
+	double min_distance = cv::norm(center - corners[0]);
+	for (size_t i = 1; i < 4; ++i) {
+		double distance = cv::norm(center - corners[i]);
+		if (distance < min_distance)
+			min_distance = distance;
+	}
+
+	for (size_t i = 0; i < 4; ++i) {
+		cv::Point half_diagonal = corners[i] - center;
+		corners[i] = center + half_diagonal * min_distance / cv::norm(half_diagonal);
+	}
+}
+
+/**
  * Renvoie l’index i du plus long bord (contour[i], contoun[(i + 1) % n]).
  */
 static size_t longest_edge_index(const std::vector<cv::Point>& contour)
@@ -207,6 +230,7 @@ std::vector<quad> find_receipts_ex(cv::Mat source, int saturation_threshold)
 
 		// Élimine un peu de bordure car il s’agit souvent d’ombre.
 		q.shrink(h * 0.005);
+		q.rectify();
 
 		receipts.push_back(q);
 	}
