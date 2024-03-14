@@ -160,9 +160,9 @@ static std::vector<cv::Point> approximate_rectangle(const std::vector<cv::Point>
 }
 
 /**
- * Renvoie la liste des countours des reçus trouvés.
+ * Version configurable de find_receipts.
  */
-std::vector<quad> find_receipts(cv::Mat source)
+std::vector<quad> find_receipts_ex(cv::Mat source, int saturation_threshold)
 {
 	// Résultat.
 	std::vector<quad> receipts;
@@ -170,7 +170,7 @@ std::vector<quad> find_receipts(cv::Mat source)
 	// Sélectionne uniquement les pixels clairs avec une saturation quasi-nulle.
 	cv::Mat image;
 	cv::cvtColor(source, image, cv::COLOR_BGR2HSV);
-	cv::inRange(image, cv::Scalar(0, 0, 128), cv::Scalar(255, 28, 255), image);
+	cv::inRange(image, cv::Scalar(0, 0, 128), cv::Scalar(255, saturation_threshold, 255), image);
 
 	// Opening pour ne pas que le bruit nous génère des contours parasites.
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
@@ -223,6 +223,28 @@ std::vector<quad> find_receipts(cv::Mat source)
 	std::sort(receipts.begin(), receipts.end(), left_of);
 
 	return receipts;
+}
+
+/**
+ * Renvoie la liste des countours des reçus trouvés. On tente plusieurs niveau
+ * de saturation car selon que l’image a été prise dans un environnement clair
+ * ou un peu ombré, le seuil utile pour avoir les meilleurs résultats varie.
+ */
+std::vector<quad> find_receipts(cv::Mat source)
+{
+	std::vector<quad> best_result;
+	for (int threshold = 16; threshold < 48; threshold += 8) {
+		std::vector<quad> candidate = find_receipts_ex(source, threshold);
+		if (candidate.size() > best_result.size()) {
+			best_result = std::move(candidate);
+		} else if (candidate.size() < best_result.size()) {
+			// Si augmenter le seuil réduit les résultats, c’est
+			// qu’on a probablement passé le seuil critique.
+			// Abandonnons !
+			break;
+		}
+	}
+	return best_result;
 }
 
 /**
