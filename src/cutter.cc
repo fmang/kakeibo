@@ -233,16 +233,10 @@ std::vector<quad> find_receipts_ex(cv::Mat source, int saturation_threshold)
 std::vector<quad> find_receipts(cv::Mat source)
 {
 	std::vector<quad> best_result;
-	for (int threshold = 16; threshold < 48; threshold += 8) {
+	for (int threshold = 16; threshold <= 48; threshold += 16) {
 		std::vector<quad> candidate = find_receipts_ex(source, threshold);
-		if (candidate.size() > best_result.size()) {
+		if (candidate.size() > best_result.size())
 			best_result = std::move(candidate);
-		} else if (candidate.size() < best_result.size()) {
-			// Si augmenter le seuil réduit les résultats, c’est
-			// qu’on a probablement passé le seuil critique.
-			// Abandonnons !
-			break;
-		}
 	}
 	return best_result;
 }
