@@ -30,7 +30,19 @@
 struct text_line {
 	cv::Rect box;
 	std::vector<cv::Rect> letters;
+	void sort();
 };
+
+/**
+ * Trie les lettres de gauche à droite.
+ */
+void text_line::sort()
+{
+	auto left_of = [](const cv::Rect& a, const cv::Rect& b) {
+		return a.x < b.x;
+	};
+	std::sort(letters.begin(), letters.end(), left_of);
+}
 
 /**
  * Reçoit une image binaire et la position de la ligne à extraire.
@@ -68,12 +80,6 @@ static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
 		letter.y += line_box.y - dilatation.height;
 		letters.push_back(letter);
 	}
-
-	// Trier les lettres de gauche à droite.
-	auto left_of = [](const cv::Rect& a, const cv::Rect& b) {
-		return a.x < b.x;
-	};
-	std::sort(letters.begin(), letters.end(), left_of);
 
 	return text_line { line_box, letters };
 }
@@ -137,13 +143,10 @@ static void draw_text_lines(cv::Mat drawing, const std::vector<text_line> lines)
 
 /**
  * Ajoute une partie droite (extra) à une ligne de base.
- * Si extra est à droite, les deux lignes sont inversées sur place.
  * Le résultat est stocké dans base.
  */
 static void merge_text_lines(text_line& base, text_line& extra)
 {
-	if (base.box.x > extra.box.x)
-		std::swap(base, extra);
 	base.box |= extra.box;
 	base.letters.insert(base.letters.end(), extra.letters.begin(), extra.letters.end());
 }
@@ -170,10 +173,7 @@ static void compact_lines(std::vector<text_line>& lines)
 
 	// Trie sur y, de haut en bas.
 	auto above = [](const text_line& a, const text_line& b) {
-		// Si deux blocs ont pratiquement le même y, on trie sur x.
-		// L’algorithme ci-dessous n’apprécie pas que les blocs d’une
-		// même ligne soient mal ordonnés.
-		return a.box.y * 20 + a.box.x < b.box.y * 20 + b.box.x;
+		return a.box.y < b.box.y;
 	};
 	std::sort(lines.begin(), lines.end(), above);
 
@@ -274,8 +274,9 @@ void scan_receipt(cv::Mat source)
 		show("detection", drawing);
 	}
 
-	for (const text_line& line : lines) {
+	for (text_line& line : lines) {
 		bool first = true;
+		line.sort();
 		for (const cv::Rect& letter : line.letters) {
 			if (first)
 				first = false;
@@ -298,7 +299,8 @@ void extract_letters(cv::Mat source)
 	cv::Mat binary = binarize(source);
 	std::vector<text_line> lines = extract_text_lines(binary);
 	compact_lines(lines);
-	for (const text_line& line : lines) {
+	for (text_line& line : lines) {
+		line.sort();
 		for (const cv::Rect& letter : line.letters)
 			save(binary(letter));
 	}
