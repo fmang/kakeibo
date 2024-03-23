@@ -1,5 +1,5 @@
 body {
-	font-size: 20px;
+	font-size: 18px;
 	font-family: sans-serif;
 	max-width: 600px;
 	padding: 0.5em 0;
@@ -40,7 +40,7 @@ svg.button {
 	padding: 0.5em;
 	height: 1.6em;
 	border-radius: 100%;
-	background-color: honeydew;
+	background-color: gainsboro;
 }
 
 svg.button.primary {
