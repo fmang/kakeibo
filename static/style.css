@@ -36,13 +36,16 @@ input {
 	border-width: 0 0 .1em 0;
 }
 
-input.primary {
-}
-
-input[type="image"] {
+svg.button {
+	padding: 0.5em;
 	height: 1.6em;
 	border-radius: 100%;
-	border: 1px solid gray;
+	background-color: honeydew;
+}
+
+svg.button.primary {
+	background-color: forestgreen;
+	fill: white;
 }
 
 .categories {
