@@ -3,6 +3,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 api = FastAPI()
 
@@ -11,9 +12,21 @@ app.mount('/api', api)
 app.mount('/', StaticFiles(directory='static', html=True))
 
 
+class Entry(BaseModel):
+	date: str
+	amount: int
+	remark: str = ""
+	category: str
+
+
 @api.get('/ping')
 def ping():
 	return 'OK'
+
+
+@api.post('/send')
+def send(entry: Entry):
+	return entry
 
 
 if __name__ == '__main__':

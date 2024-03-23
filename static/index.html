@@ -24,18 +24,18 @@
 	<input type="file" name="picture" id="picture-selector" accept="image/*" capture="environment" />
 </form>
 
-<form name="entry" method="post" action="api/send">
+<form name="entry">
 	<table>
 		<tr>
 		<th>日付</th>
 		<td>
-			<input type="date" name="date" />
+			<input type="date" name="date" required />
 			<input type="button" id="set-today-button" value="今日" />
 		</td>
 
 		<tr>
 		<th>金額</th>
-		<td><input type="number" name="amount" /></td>
+		<td><input type="number" name="amount" required /></td>
 
 		<tr>
 		<th>備考</th>

@@ -43,6 +43,10 @@ svg.button {
 	background-color: gainsboro;
 }
 
+svg.button:hover, .categories label:hover {
+	filter: brightness(107%);
+}
+
 svg.button.primary {
 	background-color: forestgreen;
 	fill: white;

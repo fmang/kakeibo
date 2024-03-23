@@ -47,3 +47,22 @@ const resetButton = document.getElementById("reset-button");
 resetButton.addEventListener("click", (event) => {
 	event.target.closest("form").reset();
 });
+
+entryForm.addEventListener("submit", (event) => {
+	event.preventDefault();
+	const data = Object.fromEntries(new FormData(entryForm));
+	fetch("api/send", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(data),
+	}).then((response) => {
+		return response.json();
+	}).then((json) => {
+		console.log(json);
+	});
+});
+
+const sendButton = document.getElementById("send-button");
+sendButton.addEventListener("click", (event) => {
+	entryForm.requestSubmit();
+});
