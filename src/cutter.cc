@@ -144,8 +144,9 @@ static std::vector<cv::Point> approximate_rectangle(const std::vector<cv::Point>
 		double cos = (b - a).dot(candidate_b - candidate_a) / (cv::norm(b - a) * cv::norm(candidate_b - candidate_a));
 		if (cos < 0.2) {
 			// On a un angle pratiquement droit.
-			cv::Point corner = intersect_lines(candidate_a, candidate_b, a, b).value();
-			corners.push_back(corner);
+			std::optional<cv::Point> corner = intersect_lines(candidate_a, candidate_b, a, b);
+			if (!corner) continue; // Saute les points problématiques.
+			corners.push_back(corner.value());
 			candidate_a = a;
 			candidate_b = b;
 		} else if (cos > 0.95) {
