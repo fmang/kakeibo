@@ -43,17 +43,17 @@
 
 		<tr>
 		<td colspan="2">
-			<ul class="categories">
-				<li class="expense" data-value="Quotidien"> 日常
-				<li class="expense" data-value="Loisir"> 道楽
-				<li class="expense" data-value="Facture"> 勘定
-				<li class="expense" data-value="Autre"> その他
-			</ul>
-			<ul class="categories">
-				<li class="income" data-value="Salaire"> 給料
-				<li class="income" data-value="Autre"> 収入
-				<li class="transfer" data-value="Transfert"> 振込
-			</ul>
+			<div class="categories">
+				<label class="expense"><input type="radio" name="category" value="日常">日常</label>
+				<label class="expense"><input type="radio" name="category" value="道楽">道楽</label>
+				<label class="expense"><input type="radio" name="category" value="勘定">勘定</label>
+				<label class="expense"><input type="radio" name="category" value="その他">その他</label>
+			</div>
+			<div class="categories">
+				<label class="income"><input type="radio" name="category" value="給料">給料</label>
+				<label class="income"><input type="radio" name="category" value="収入">収入</label>
+				<label class="transfer"><input type="radio" name="category" value="振込">振込</label>
+			</div>
 		</td>
 	</table>
 

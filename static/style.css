@@ -26,7 +26,7 @@ form table {
 	border-spacing: 0.5em;
 }
 form th { white-space: nowrap; }
-form td:has(input) { display: flex; gap: 0.5em; }
+form td:has(> input) { display: flex; gap: 0.5em; }
 form td > input { flex-grow: 1; }
 form td > input[type="date"] + input[type="button"] { flex-grow: 0; }
 
@@ -52,17 +52,23 @@ svg.button.primary {
 	display: flex;
 	flex-flow: row wrap;
 	gap: 0.5em;
-	list-style-type: none;
-	padding: 0;
 	margin: 0.5em 0;
 }
 
-.categories li {
+.categories label {
 	flex-grow: 1;
 	text-align: center;
 	white-space: nowrap;
 	border-radius: 0.5em;
 	padding: 0.5em;
+}
+
+.categories label:has(input:checked) {
+	font-weight: bold;
+}
+
+.categories input {
+	display: none;
 }
 
 .categories .expense { background-color: antiquewhite; }
