@@ -45,24 +45,36 @@ void text_line::sort()
 }
 
 /**
- * Reçoit une image binaire et la position de la ligne à extraire.
+ * Reçoit une image binaire et le contour de la ligne à extraire.
  * Extrait les lettres de la ligne et construit l’objet text_line.
  */
-static text_line extract_text_line(cv::Mat binary, cv::Rect line_box)
+static text_line extract_text_line(cv::Mat binary, const std::vector<cv::Point>& contour)
 {
+	std::vector<cv::Point> hull;
+	cv::convexHull(contour, hull);
+	cv::Rect line_box = cv::boundingRect(hull);
+	if (line_box.area() < 50) // Ignore le bruit.
+		return {};
+
 	cv::Size dilatation { /* horizontal */ 1, /* vertical */ 19 };
 	cv::Mat extract = cv::Mat(
 		line_box.height + 2 * dilatation.height,
 		line_box.width + 2 * dilatation.width,
-		binary.type()
+		binary.type(),
+		cv::Scalar(0)
 	);
 
-	cv::copyMakeBorder(
-		binary(line_box), extract,
-		/* top */ dilatation.height, /* bottom */ dilatation.height,
-		/* left */ dilatation.width, /* right */ dilatation.width,
-		cv::BORDER_CONSTANT | cv::BORDER_ISOLATED
-	);
+	cv::Mat input_roi = binary(line_box);
+	cv::Mat input_mask = cv::Mat(line_box.height, line_box.width, CV_8UC1, cv::Scalar(0));
+	for (cv::Point& p : hull) p -= line_box.tl();
+	cv::fillConvexPoly(input_mask, hull, cv::Scalar(255));
+
+	// Copie la ligne qui nous intéresse au milieu de *extract*, avec les
+	// bordures pour la dilatation. Le masque sert à ne pas prendre de
+	// morceaux des lignes autour si la ligne est de travers.
+	cv::Rect output_box(dilatation.width, dilatation.height, line_box.width, line_box.height);
+	cv::Mat output_roi = extract(output_box);
+	input_roi.copyTo(output_roi, input_mask);
 
 	// La dilatation verticale permet de rassembler les contours d’une même lettre.
 	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(dilatation.width, dilatation.height));
@@ -99,11 +111,7 @@ static std::vector<text_line> extract_text_lines(cv::Mat binary)
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(dilated, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	for (auto& contour : contours) {
-		cv::Rect box = cv::boundingRect(contour);
-		if (box.area() < 50) // Ignore le bruit.
-			continue;
-
-		text_line line = extract_text_line(binary, box);
+		text_line line = extract_text_line(binary, contour);
 		if (line.letters.empty())
 			continue;
 
