@@ -24,27 +24,27 @@
 	<input type="file" name="picture" id="picture-selector" accept="image/*" capture="environment" />
 </form>
 
-<form method="post" action="api/send">
+<form name="entry" method="post" action="api/send">
 	<table>
 		<tr>
 		<th>日付</th>
 		<td>
-			<input type="date" />
-			<input type="button" value="今日" />
+			<input type="date" name="date" />
+			<input type="button" id="set-today-button" value="今日" />
 		</td>
 
 		<tr>
 		<th>金額</th>
-		<td><input type="number" /></td>
+		<td><input type="number" name="amount" /></td>
 
 		<tr>
 		<th>備考</th>
-		<td><input type="text" /></td>
+		<td><input type="text" name="remark" /></td>
 
 		<tr>
 		<td colspan="2">
 			<div class="categories">
-				<label class="expense"><input type="radio" name="category" value="日常">日常</label>
+				<label class="expense"><input type="radio" name="category" value="日常" checked>日常</label>
 				<label class="expense"><input type="radio" name="category" value="道楽">道楽</label>
 				<label class="expense"><input type="radio" name="category" value="勘定">勘定</label>
 				<label class="expense"><input type="radio" name="category" value="その他">その他</label>
@@ -58,11 +58,11 @@
 	</table>
 
 	<div class="actions">
-		<svg class="button" title="リセット" viewBox="0 0 24 24">
+		<svg id="reset-button" class="button" title="リセット" viewBox="0 0 24 24">
 			<!-- Material Design: close-thick -->
 			<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
 		</svg>
-		<svg class="button primary" title="送信" viewBox="0 0 24 24">
+		<svg id="send-button" class="button primary" title="送信" viewBox="0 0 24 24">
 			<!-- Material Design: send -->
 			<path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
 		</svg>
