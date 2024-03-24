@@ -51,6 +51,9 @@ resetButton.addEventListener("click", (event) => {
 entryForm.addEventListener("submit", (event) => {
 	event.preventDefault();
 	const data = Object.fromEntries(new FormData(entryForm));
+	data.id ||= null
+	data.amount = Number(data.amount)
+
 	fetch("api/send", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -60,6 +63,9 @@ entryForm.addEventListener("submit", (event) => {
 	}).then((json) => {
 		console.log(json);
 	});
+
+	entryForm.reset();
+	entryForm.elements["category"].value = data.category;
 });
 
 const sendButton = document.getElementById("send-button");

@@ -1,6 +1,9 @@
+import csv
 import uvicorn
 import os
+import time
 
+from datetime import date, datetime
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -13,9 +16,10 @@ app.mount('/', StaticFiles(directory='static', html=True))
 
 
 class Entry(BaseModel):
-	date: str
+	id: int | None
+	date: date
 	amount: int
-	remark: str = ""
+	remark: str
 	category: str
 
 
@@ -24,9 +28,34 @@ def ping():
 	return 'OK'
 
 
+last_id = 0
+
+def generate_id():
+	global last_id
+	id = max(int(time.time()), last_id + 1)
+	last_id = id
+	return id
+
+
 @api.post('/send')
 def send(entry: Entry):
-	return entry
+	id = entry.id or generate_id()
+	row = [
+		entry.date.isoformat(),
+		entry.category,
+		entry.amount,
+		None, # TODO
+		entry.remark,
+		id,
+		datetime.now().isoformat(),
+		None, # TODO Écrire l’auteur.
+	]
+
+	with open('log.tsv', 'a') as log:
+		writer = csv.writer(log, dialect='excel-tab')
+		writer.writerow(row)
+
+	return { 'id': id }
 
 
 if __name__ == '__main__':
