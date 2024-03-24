@@ -59,7 +59,7 @@ svg.button.primary {
 	margin: 0.5em 0;
 }
 
-.categories label {
+.categories > * {
 	flex-grow: 1;
 	text-align: center;
 	white-space: nowrap;
@@ -71,7 +71,7 @@ svg.button.primary {
 	font-weight: bold;
 }
 
-.categories input {
+.categories input[type="radio"] {
 	display: none;
 }
 
@@ -82,4 +82,9 @@ svg.button.primary {
 .actions {
 	display: flex;
 	justify-content: space-evenly;
+}
+
+#bill-dialog h2 {
+	text-align: center;
+	margin: 0;
 }

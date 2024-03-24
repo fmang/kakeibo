@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width" />
 <link rel="manifest" href="manifest.json" />
 <link rel="stylesheet" href="style.css" />
+<title>家計簿</title>
 
 <header>
 	<h1>家計簿</h1>
@@ -46,7 +47,7 @@
 			<div class="categories">
 				<label class="expense"><input type="radio" name="category" value="日常" checked>日常</label>
 				<label class="expense"><input type="radio" name="category" value="道楽">道楽</label>
-				<label class="expense"><input type="radio" name="category" value="勘定">勘定</label>
+				<label class="expense"><input type="radio" name="category" id="bill-category" value="月額">月額</label>
 				<label class="expense"><input type="radio" name="category" value="その他">その他</label>
 			</div>
 			<div class="categories">
@@ -68,5 +69,26 @@
 		</svg>
 	</div>
 </form>
+
+<dialog id="bill-dialog">
+	<h2>月額</h2>
+	<form name="bill">
+		<div class="categories">
+			<input type="submit" name="target" class="expense" value="家賃" />
+			<input type="submit" name="target" class="expense" value="電気" />
+			<input type="submit" name="target" class="expense" value="水道" />
+		</div>
+		<div class="categories">
+			<input type="submit" name="target" class="expense" value="Netflix" />
+			<input type="submit" name="target" class="expense" value="U-NEXT" />
+		</div>
+	</form>
+	<div class="actions">
+		<svg id="close-bill-dialog-button" class="button" title="閉じる" viewBox="0 0 24 24">
+			<!-- Material Design: close-thick -->
+			<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
+		</svg>
+	</div>
+</dialog>
 
 <script src="ui.js"></script>

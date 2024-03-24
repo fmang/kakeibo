@@ -66,3 +66,21 @@ const sendButton = document.getElementById("send-button");
 sendButton.addEventListener("click", (event) => {
 	entryForm.requestSubmit();
 });
+
+const billDialog = document.getElementById("bill-dialog");
+const billForm = document.forms.bill;
+billForm.addEventListener("submit", (event) => {
+	event.preventDefault();
+	remarkField.value = event.submitter.value;
+	billDialog.close();
+});
+
+const billCategory = document.getElementById("bill-category");
+billCategory.addEventListener("change", (event) => {
+	billDialog.showModal();
+});
+
+const closeBillDialogButton = document.getElementById("close-bill-dialog-button");
+closeBillDialogButton.addEventListener("click", (event) => {
+	billDialog.close();
+});
