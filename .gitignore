@@ -2,4 +2,9 @@
 __pycache__
 
 /build
+/env.sh
 /extracted
+/ssl
+
+/log.tsv
+t/*.jpg
