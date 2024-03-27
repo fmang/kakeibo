@@ -7,18 +7,24 @@
 
 <header>
 	<h1>家計簿</h1>
-	<svg id="open-history-button" class="button" title="履歴" viewBox="0 0 24 24">
-		<!-- Material Design: history -->
-		<path d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
-	</svg>
-	<svg id="select-picture-button" class="button" title="アップロード" viewBox="0 0 24 24">
-		<!-- Material Design: upload -->
-		<path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" />
-	</svg>
-	<svg id="take-picture-button" class="button primary" title="撮影" viewBox="0 0 24 24">
-		<!-- Material Design: camera -->
-		<path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
-	</svg>
+	<button id="open-history-button" class="icon" title="履歴">
+		<svg id="open-history-button" class="button" title="履歴" viewBox="0 0 24 24">
+			<!-- Material Design: history -->
+			<path d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
+		</svg>
+	</button>
+	<button id="select-picture-button" class="icon" title="アップロード">
+		<svg viewBox="0 0 24 24">
+			<!-- Material Design: upload -->
+			<path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" />
+		</svg>
+	</button>
+	<button id="take-picture-button" class="icon primary" title="撮影">
+		<svg viewBox="0 0 24 24">
+			<!-- Material Design: camera -->
+			<path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+		</svg>
+	</button>
 </header>
 
 <form method="post" action="api/picture">
@@ -61,14 +67,18 @@
 	</table>
 
 	<div class="actions">
-		<svg id="reset-button" class="button" title="リセット" viewBox="0 0 24 24">
-			<!-- Material Design: close-thick -->
-			<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
-		</svg>
-		<svg id="send-button" class="button primary" title="送信" viewBox="0 0 24 24">
-			<!-- Material Design: send -->
-			<path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
-		</svg>
+		<button type="reset" class="icon" title="リセット">
+			<svg viewBox="0 0 24 24">
+				<!-- Material Design: close-thick -->
+				<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
+			</svg>
+		</button>
+		<button type="submit" class="icon primary" title="送信">
+			<svg viewBox="0 0 24 24">
+				<!-- Material Design: send -->
+				<path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+			</svg>
+		</button>
 	</div>
 </form>
 
@@ -85,22 +95,26 @@
 			<input type="submit" name="target" class="expense" value="U-NEXT" />
 		</div>
 	</form>
-	<div class="actions">
-		<svg id="close-bill-dialog-button" class="button" title="閉じる" viewBox="0 0 24 24">
-			<!-- Material Design: close-thick -->
-			<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
-		</svg>
-	</div>
+	<form class="actions">
+		<button class="icon" formmethod="dialog" title="閉じる">
+			<svg viewBox="0 0 24 24">
+				<!-- Material Design: close-thick -->
+				<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
+			</svg>
+		</button>
+	</form>
 </dialog>
 
 <dialog id="history-dialog">
 	<h2>履歴</h2>
 	<table id="history-table"></table>
-	<div class="actions">
-		<svg id="close-history-button" class="button" title="閉じる" viewBox="0 0 24 24">
-			<!-- Material Design: close-thick -->
-			<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
-		</svg>
+	<form class="actions">
+		<button class="icon" formmethod="dialog" title="閉じる">
+			<svg viewBox="0 0 24 24">
+				<!-- Material Design: close-thick -->
+				<path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" />
+			</svg>
+		</button>
 	</div>
 </dialog>
 

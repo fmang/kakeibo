@@ -30,34 +30,37 @@ form td:has(> input) { display: flex; gap: 0.5em; }
 form td > input { flex-grow: 1; }
 form td > input[type="date"] + input[type="button"] { flex-grow: 0; }
 
-input {
+input, button {
 	font-size: 1em;
 	padding: 0.5em;
 	border-width: 0 0 .1em 0;
+	background-color: white;
 }
 
-svg.button {
-	padding: 0.5em;
-	height: 1.6em;
+button.icon {
 	border-radius: 100%;
-	background-color: gainsboro;
 }
 
-svg.button:hover, .categories label:hover {
+button.icon svg {
+	height: 1.6em;
+	vertical-align: middle;
+}
+
+button:hover, .categories label:hover {
 	filter: brightness(107%);
 }
 
-svg.button.primary {
+button.primary {
 	background-color: forestgreen;
 	fill: white;
 }
 
-svg.button.loading {
+button.loading {
 	background-color: darkblue;
 	fill: white;
 }
 
-svg.button.error {
+button.error {
 	background-color: darkred;
 	fill: white;
 }
@@ -89,7 +92,7 @@ svg.button.error {
 .categories .income { background-color: lavender; }
 .categories .transfer { background-color: lavender; }
 
-div.actions {
+div.actions, form.actions {
 	display: flex;
 	justify-content: space-evenly;
 }

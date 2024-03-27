@@ -43,11 +43,6 @@ setTodayButton.addEventListener("click", (event) => {
 	dateField.value = today();
 });
 
-const resetButton = document.getElementById("reset-button");
-resetButton.addEventListener("click", (event) => {
-	event.target.closest("form").reset();
-});
-
 entryForm.addEventListener("submit", (event) => {
 	event.preventDefault();
 	const data = Object.fromEntries(new FormData(entryForm));
@@ -56,11 +51,6 @@ entryForm.addEventListener("submit", (event) => {
 	new Entry(data).send();
 	entryForm.reset();
 	entryForm.elements["category"].value = data.category;
-});
-
-const sendButton = document.getElementById("send-button");
-sendButton.addEventListener("click", (event) => {
-	entryForm.requestSubmit();
 });
 
 const billDialog = document.getElementById("bill-dialog");
@@ -76,20 +66,11 @@ billCategory.addEventListener("change", (event) => {
 	billDialog.showModal();
 });
 
-const closeBillDialogButton = document.getElementById("close-bill-dialog-button");
-closeBillDialogButton.addEventListener("click", (event) => {
-	billDialog.close();
-});
-
 const historyDialog = document.getElementById("history-dialog");
 const openHistoryButton = document.getElementById("open-history-button");
-const closeHistoryButton = document.getElementById("close-history-button");
 openHistoryButton.addEventListener("click", (event) => {
 	historyDialog.showModal();
 	openHistoryButton.classList.remove("error");
-});
-closeHistoryButton.addEventListener("click", (event) => {
-	historyDialog.close();
 });
 
 const historyTable = document.getElementById("history-table");
