@@ -86,21 +86,17 @@ class Entry {
 		this.data = data;
 
 		const dateCell = document.createElement("td");
-		dateCell.className = "date";
-		dateCell.innerText = data.date;
-		const categoryCell = document.createElement("td");
-		dateCell.className = "category";
-		categoryCell.innerText = data.category;
+		dateCell.className = "numeric";
+		dateCell.innerText = data.date.replace(/^\d+-0?(\d+)-0?(\d+)$/, "$1月$2日");
 		const amountCell = document.createElement("td");
-		dateCell.className = "amount";
-		amountCell.innerText = data.amount;
+		amountCell.className = "numeric";
+		amountCell.innerText = data.amount + "円";
 		this.#statusCell = document.createElement("td");
 		this.#actionsCell = document.createElement("td");
 		this.#actionsCell.className = "actions";
 
 		this.#row = document.createElement("tr");
 		this.#row.appendChild(dateCell);
-		this.#row.appendChild(categoryCell);
 		this.#row.appendChild(amountCell);
 		this.#row.appendChild(this.#statusCell);
 		this.#row.appendChild(this.#actionsCell);
@@ -108,7 +104,7 @@ class Entry {
 	}
 
 	send() {
-		this.#statusCell.innerText = "送信中…";
+		this.#statusCell.innerText = "送信中";
 		this.#statusCell.className = "loading";
 		openHistoryButton.classList.add("loading");
 
@@ -168,7 +164,7 @@ class Entry {
 	}
 
 	withdraw() {
-		this.#statusCell.innerText = "取消中…";
+		this.#statusCell.innerText = "取消中";
 		this.#statusCell.className = "loading";
 		openHistoryButton.classList.add("loading");
 
