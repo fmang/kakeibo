@@ -53,17 +53,7 @@ entryForm.addEventListener("submit", (event) => {
 	const data = Object.fromEntries(new FormData(entryForm));
 	data.id ||= null
 	data.amount = Number(data.amount)
-
-	fetch("api/send", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(data),
-	}).then((response) => {
-		return response.json();
-	}).then((json) => {
-		console.log(json);
-	});
-
+	sendEntry(data);
 	entryForm.reset();
 	entryForm.elements["category"].value = data.category;
 });
@@ -90,3 +80,57 @@ const closeBillDialogButton = document.getElementById("close-bill-dialog-button"
 closeBillDialogButton.addEventListener("click", (event) => {
 	billDialog.close();
 });
+
+const historyDialog = document.getElementById("history-dialog");
+const openHistoryButton = document.getElementById("open-history-button");
+const closeHistoryButton = document.getElementById("close-history-button");
+openHistoryButton.addEventListener("click", (event) => {
+	historyDialog.showModal();
+});
+closeHistoryButton.addEventListener("click", (event) => {
+	historyDialog.close();
+});
+
+const historyTable = document.getElementById("history-table");
+
+class Entry {
+	#status;
+	constructor(data) {
+		this.data = data;
+
+		const dateCell = document.createElement("td");
+		dateCell.innerText = data.date;
+		const categoryCell = document.createElement("td");
+		categoryCell.innerText = data.category;
+		const amountCell = document.createElement("td");
+		amountCell.innerText = data.amount;
+
+		const row = document.createElement("tr");
+		row.appendChild(dateCell);
+		row.appendChild(categoryCell);
+		row.appendChild(amountCell);
+		historyTable.appendChild(row);
+	}
+	set status(value) {
+		this.#status = value;
+	}
+	set id(value) {
+		this.data.id = value;
+	}
+}
+
+let history = [];
+function sendEntry(data) {
+	entry = new Entry(data);
+	fetch("api/send", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(data),
+	}).then((response) => {
+		return response.json();
+	}).then((json) => {
+		entry.id = json['id'];
+	}).catch((error) => {
+		entry.status = error.message;
+	})
+}
