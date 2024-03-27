@@ -23,6 +23,10 @@ class Entry(BaseModel):
 	category: str
 
 
+class Withdrawal(BaseModel):
+	id: int
+
+
 @api.get('/ping')
 def ping():
 	return 'OK'
@@ -37,10 +41,16 @@ def generate_id():
 	return id
 
 
+def log_entry(*row):
+	with open('log.tsv', 'a') as log:
+		writer = csv.writer(log, dialect='excel-tab')
+		writer.writerow(row)
+
+
 @api.post('/send')
 def send(entry: Entry):
 	id = entry.id or generate_id()
-	row = [
+	log_entry(
 		entry.date.isoformat(),
 		entry.category,
 		entry.amount,
@@ -49,13 +59,29 @@ def send(entry: Entry):
 		id,
 		datetime.now().isoformat(),
 		None, # TODO Écrire l’auteur.
-	]
-
-	with open('log.tsv', 'a') as log:
-		writer = csv.writer(log, dialect='excel-tab')
-		writer.writerow(row)
+	)
 
 	return { 'id': id }
+
+
+@api.post('/withdraw')
+def withdraw(withdrawal: Withdrawal):
+	"""
+	Ajoute une ligne avec tous les champs vide sauf l’ID et les métadonnées
+	API pour marquer la pierre tombale.
+	"""
+	log_entry(
+		None,
+		None,
+		None,
+		None,
+		None,
+		withdrawal.id,
+		datetime.now().isoformat(),
+		None, # TODO Écrire l’auteur.
+	)
+
+	return {}
 
 
 if __name__ == '__main__':

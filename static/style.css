@@ -52,6 +52,16 @@ svg.button.primary {
 	fill: white;
 }
 
+svg.button.loading {
+	background-color: darkblue;
+	fill: white;
+}
+
+svg.button.error {
+	background-color: darkred;
+	fill: white;
+}
+
 .categories {
 	display: flex;
 	flex-flow: row wrap;
@@ -79,12 +89,37 @@ svg.button.primary {
 .categories .income { background-color: lavender; }
 .categories .transfer { background-color: lavender; }
 
-.actions {
+div.actions {
 	display: flex;
 	justify-content: space-evenly;
 }
 
-#bill-dialog h2 {
+dialog h2 {
 	text-align: center;
 	margin: 0;
 }
+
+#history-dialog table {
+	margin: 0.5em 0;
+	width: 100%;
+}
+
+#history-dialog table:empty::after {
+	content: "空";
+	display: block;
+	color: gray;
+	text-align: center;
+}
+
+#history-dialog td {
+	padding: 0.2em 0.5em;
+}
+
+td.date, td.amount, td.actions {
+	text-align: right;
+}
+
+.withdrawn { color: gray; }
+.loading { color: darkblue; }
+.success { color: darkgreen; }
+.error { color: darkred; }
