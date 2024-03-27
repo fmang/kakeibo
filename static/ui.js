@@ -191,7 +191,6 @@ class Entry {
 		this.#statusCell.innerText = "取消済";
 		this.#statusCell.className = "success";
 		this.#row.classList.add("withdrawn");
-		this.#withdrawButton.remove();
 	}
 
 	#onWithdrawalError() {
