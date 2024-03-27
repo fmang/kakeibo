@@ -25,16 +25,20 @@ form table {
 	width: 100%;
 	border-spacing: 0.5em;
 }
+
 form th { white-space: nowrap; }
 form td:has(> input) { display: flex; gap: 0.5em; }
 form td > input { flex-grow: 1; }
-form td > input[type="date"] + input[type="button"] { flex-grow: 0; }
 
 input, button {
 	font-size: 1em;
 	padding: 0.5em;
 	border-width: 0 0 .1em 0;
 	background-color: white;
+}
+
+button:hover {
+	background-color: gainsboro;
 }
 
 button.icon {
@@ -46,13 +50,13 @@ button.icon svg {
 	vertical-align: middle;
 }
 
-button:hover, .categories label:hover {
-	filter: brightness(107%);
-}
-
 button.primary {
 	background-color: forestgreen;
 	fill: white;
+}
+
+button.primary:hover {
+	background-color: darkgreen;
 }
 
 button.loading {
@@ -80,12 +84,19 @@ button.error {
 	padding: 0.5em;
 }
 
-.categories label:has(input:checked) {
-	font-weight: bold;
+.categories label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.2em;
 }
 
-.categories input[type="radio"] {
-	display: none;
+.categories label input {
+	margin: 0;
+}
+
+.categories label:has(input:checked) {
+	font-weight: bold;
 }
 
 .categories .expense { background-color: antiquewhite; }
@@ -122,7 +133,7 @@ td.date, td.amount, td.actions {
 	text-align: right;
 }
 
-.withdrawn { color: gray; }
-.loading { color: darkblue; }
-.success { color: darkgreen; }
-.error { color: darkred; }
+td.withdrawn { color: gray; }
+td.loading { color: darkblue; }
+td.success { color: darkgreen; }
+td.error { color: darkred; }
