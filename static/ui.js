@@ -28,8 +28,8 @@ selectPictureButton.addEventListener("click", (event) => {
 });
 
 const takePictureButton = document.getElementById("take-picture-button");
-if (pictureSelector.capture == undefined) // Non supporté par le navigateur.
-	takePictureButton.style.display = "none";
+if (pictureSelector.capture) // Supporté par le navigateur.
+	takePictureButton.style.display = "inline";
 takePictureButton.addEventListener("click", (event) => {
 	pictureSelector.setAttribute("capture", "environment");
 	pictureSelector.showPicker();
