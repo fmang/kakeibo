@@ -1,5 +1,25 @@
-const pictureSelector = document.getElementById("picture-selector");
-pictureSelector.addEventListener("change", (event) => { event.target.form.submit(); });
+class LoadingState {
+	#counter = 0;
+
+	constructor(button) {
+		this.button = button;
+	}
+
+	increment() {
+		this.#counter += 1;
+		this.button.classList.add("loading");
+	}
+
+	decrement() {
+		this.#counter -= 1;
+		if (this.#counter == 0)
+			this.button.classList.remove("loading");
+	}
+}
+
+const uploadForm = document.forms.upload;
+const pictureSelector = uploadForm.elements.picture;
+pictureSelector.addEventListener("change", (event) => { event.target.form.requestSubmit(); });
 
 const selectPictureButton = document.getElementById("select-picture-button");
 selectPictureButton.addEventListener("click", (event) => {
@@ -14,6 +34,44 @@ takePictureButton.addEventListener("click", (event) => {
 	pictureSelector.setAttribute("capture", "environment");
 	pictureSelector.showPicker();
 });
+
+const uploadLoadingState = new LoadingState(selectPictureButton);
+const receiptQueue = [];
+
+uploadForm.addEventListener("submit", (event) => {
+	event.preventDefault();
+	uploadLoadingState.increment();
+	selectPictureButton.classList.remove("error");
+
+	fetch("api/upload", {
+		method: "POST",
+		body: new FormData(uploadForm),
+	}).then((response) => {
+		if (response.ok)
+			return response.json();
+		else
+			throw new Error("HTTP " + response.status);
+	}).then((json) => {
+		for (const receipt in json.receipts)
+			receiptQueue.push(receipt);
+		if (!amountField.value)
+			popReceipt();
+	}).catch((error) => {
+		console.log(error.message);
+		selectPictureButton.classList.add("error");
+	}).finally(() => {
+		historyLoadingState.decrement();
+	})
+});
+
+function popReceipt() {
+	const receipt = receiptQueue.unshift();
+	if (!receipt)
+		return;
+
+	dateField.value = receipt.date;
+	amountField.value = receipt.total;
+}
 
 function today() {
 	return new Date().toISOString().split("T")[0];
@@ -51,6 +109,7 @@ entryForm.addEventListener("submit", (event) => {
 	new Entry(data).send();
 	entryForm.reset();
 	entryForm.elements["category"].value = data.category;
+	popReceipt();
 });
 
 const billDialog = document.getElementById("bill-dialog");
@@ -86,26 +145,6 @@ openHistoryButton.addEventListener("click", (event) => {
 });
 
 const historyTable = document.getElementById("history-table");
-
-class LoadingState {
-	#counter = 0;
-
-	constructor(button) {
-		this.button = button;
-	}
-
-	increment() {
-		this.#counter += 1;
-		this.button.classList.add("loading");
-	}
-
-	decrement() {
-		this.#counter -= 1;
-		if (this.#counter == 0)
-			this.button.classList.remove("loading");
-	}
-}
-
 const historyLoadingState = new LoadingState(openHistoryButton);
 
 class Entry {

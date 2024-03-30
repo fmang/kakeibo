@@ -17,10 +17,6 @@ header h1 {
 	margin: 0;
 }
 
-#picture-selector {
-	display: none;
-}
-
 form table {
 	width: 100%;
 	border-spacing: 0.5em;
