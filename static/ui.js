@@ -66,6 +66,18 @@ billCategory.addEventListener("change", (event) => {
 	billDialog.showModal();
 });
 
+const otherCategory = document.getElementById("other-category");
+otherCategory.addEventListener("change", (event) => {
+	if (!remarkField.value)
+		remarkField.focus();
+});
+
+const incomeCategory = document.getElementById("income-category");
+incomeCategory.addEventListener("change", (event) => {
+	if (!remarkField.value)
+		remarkField.focus();
+});
+
 const historyDialog = document.getElementById("history-dialog");
 const openHistoryButton = document.getElementById("open-history-button");
 openHistoryButton.addEventListener("click", (event) => {
