@@ -87,6 +87,27 @@ openHistoryButton.addEventListener("click", (event) => {
 
 const historyTable = document.getElementById("history-table");
 
+class LoadingState {
+	#counter = 0;
+
+	constructor(button) {
+		this.button = button;
+	}
+
+	increment() {
+		this.#counter += 1;
+		this.button.classList.add("loading");
+	}
+
+	decrement() {
+		this.#counter -= 1;
+		if (this.#counter == 0)
+			this.button.classList.remove("loading");
+	}
+}
+
+const historyLoadingState = new LoadingState(openHistoryButton);
+
 class Entry {
 	#row;
 	#statusCell;
@@ -118,7 +139,7 @@ class Entry {
 	send() {
 		this.#statusCell.innerText = "送信中";
 		this.#statusCell.className = "loading";
-		openHistoryButton.classList.add("loading");
+		historyLoadingState.increment();
 
 		fetch("api/send", {
 			method: "POST",
@@ -135,7 +156,7 @@ class Entry {
 			console.log(error.message);
 			this.#onError();
 		}).finally(() => {
-			openHistoryButton.classList.remove("loading");
+			historyLoadingState.decrement();
 		})
 	}
 
@@ -178,7 +199,7 @@ class Entry {
 	withdraw() {
 		this.#statusCell.innerText = "取消中";
 		this.#statusCell.className = "loading";
-		openHistoryButton.classList.add("loading");
+		historyLoadingState.increment();
 
 		fetch("api/withdraw", {
 			method: "POST",
@@ -195,7 +216,7 @@ class Entry {
 			console.log(error.message);
 			this.#onWithdrawalError();
 		}).finally(() => {
-			openHistoryButton.classList.remove("loading");
+			historyLoadingState.decrement();
 		})
 	}
 
