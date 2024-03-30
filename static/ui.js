@@ -52,7 +52,7 @@ uploadForm.addEventListener("submit", (event) => {
 		else
 			throw new Error("HTTP " + response.status);
 	}).then((json) => {
-		for (const receipt in json.receipts)
+		for (const receipt of json.receipts)
 			receiptQueue.push(receipt);
 		if (!amountField.value)
 			popReceipt();
@@ -60,12 +60,12 @@ uploadForm.addEventListener("submit", (event) => {
 		console.log(error.message);
 		selectPictureButton.classList.add("error");
 	}).finally(() => {
-		historyLoadingState.decrement();
+		uploadLoadingState.decrement();
 	})
 });
 
 function popReceipt() {
-	const receipt = receiptQueue.unshift();
+	const receipt = receiptQueue.shift();
 	if (!receipt)
 		return;
 

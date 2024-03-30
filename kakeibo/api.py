@@ -1,12 +1,15 @@
 import csv
 import uvicorn
 import os
+import shutil
 import time
 
 from datetime import date, datetime
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+import kakeibo.receipt
 
 api = FastAPI()
 
@@ -82,6 +85,17 @@ def withdraw(withdrawal: Withdrawal):
 	)
 
 	return {}
+
+
+@api.post('/upload')
+def upload(picture: UploadFile):
+	os.makedirs('uploads', exist_ok=True)
+	destination = f"uploads/{generate_id()}"
+	with open(destination, "wb") as output:
+		shutil.copyfileobj(picture.file, output)
+	picture.file.close()
+
+	return { 'receipts': kakeibo.receipt.scan_pictures(destination) }
 
 
 if __name__ == '__main__':
