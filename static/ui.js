@@ -104,7 +104,6 @@ setTodayButton.addEventListener("click", (event) => {
 entryForm.addEventListener("submit", (event) => {
 	event.preventDefault();
 	const data = Object.fromEntries(new FormData(entryForm));
-	data.id ||= null
 	data.amount = Number(data.amount)
 	new Entry(data).send();
 	entryForm.reset();

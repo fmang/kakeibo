@@ -19,7 +19,6 @@ app.mount('/', StaticFiles(directory='static', html=True))
 
 
 class Entry(BaseModel):
-	id: int | None
 	date: date
 	amount: int
 	remark: str
@@ -52,7 +51,7 @@ def log_entry(*row):
 
 @api.post('/send')
 def send(entry: Entry):
-	id = entry.id or generate_id()
+	id = generate_id()
 	log_entry(
 		entry.date.isoformat(),
 		entry.category,
