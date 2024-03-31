@@ -8,4 +8,5 @@ __pycache__
 
 /log.tsv
 /uploads
+/api-keys
 t/*.jpg
