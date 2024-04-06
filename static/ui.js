@@ -185,6 +185,7 @@ openHistoryButton.addEventListener("click", (event) => {
 
 const historyTable = document.getElementById("history-table");
 const historyLoadingState = new LoadingState(openHistoryButton);
+const amountFormatter = Intl.NumberFormat("ja-JP", { signDisplay: "exceptZero" });
 
 class Entry {
 	#row;
@@ -201,7 +202,8 @@ class Entry {
 		dateCell.innerText = data.date.replace(/^\d+-0?(\d+)-0?(\d+)$/, "$1月$2日");
 		const amountCell = document.createElement("td");
 		amountCell.className = "numeric";
-		amountCell.innerText = data.amount + "円";
+		amountCell.innerText = amountFormatter.format(data[me]) + "円";
+		amountCell.title = data.category;
 		this.#statusCell = document.createElement("td");
 		this.#actionsCell = document.createElement("td");
 		this.#actionsCell.className = "actions";
