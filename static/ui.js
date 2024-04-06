@@ -55,7 +55,6 @@ const receiptQueue = [];
 uploadForm.onsubmit = (event) => {
 	event.preventDefault();
 	uploadLoadingState.increment();
-	selectPictureButton.classList.remove("error");
 
 	fetch("api/upload", {
 		method: "POST",
@@ -72,7 +71,6 @@ uploadForm.onsubmit = (event) => {
 			popReceipt();
 	}).catch((error) => {
 		alert(error.message);
-		selectPictureButton.classList.add("error");
 	}).finally(() => {
 		uploadLoadingState.decrement();
 	})
