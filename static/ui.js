@@ -57,7 +57,7 @@ uploadForm.addEventListener("submit", (event) => {
 		if (!amountField.value)
 			popReceipt();
 	}).catch((error) => {
-		console.log(error.message);
+		alert(error.message);
 		selectPictureButton.classList.add("error");
 	}).finally(() => {
 		uploadLoadingState.decrement();
@@ -191,7 +191,7 @@ class Entry {
 		}).then((json) => {
 			this.#onSuccess(json['id']);
 		}).catch((error) => {
-			console.log(error.message);
+			alert(error.message);
 			this.#onError();
 		}).finally(() => {
 			historyLoadingState.decrement();
@@ -251,7 +251,7 @@ class Entry {
 		}).then((json) => {
 			this.#onWithdrawalSuccess();
 		}).catch((error) => {
-			console.log(error.message);
+			alert(error.message);
 			this.#onWithdrawalError();
 		}).finally(() => {
 			historyLoadingState.decrement();
