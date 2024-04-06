@@ -1,3 +1,18 @@
+function getCookie(name) {
+	for (const cookie of document.cookie.split("; ")) {
+		const [key, value] = cookie.split("=", 2);
+		if (key == name) return value;
+	}
+}
+
+const me = getCookie("kakeibo_user");
+let you;
+switch (me) {
+	case 'riku': you = 'anju'; break;
+	case 'anju': you = 'riku'; break;
+	default: document.location = 'welcome.html';
+}
+
 class LoadingState {
 	#counter = 0;
 
@@ -101,10 +116,35 @@ setTodayButton.addEventListener("click", (event) => {
 	dateField.value = today();
 });
 
+/** Bâtit le JSON d’entrée à envoyer à l’API */
+function buildEntryData() {
+	const data = Object.fromEntries(new FormData(entryForm));
+	const amount = Number(data.amount);
+	delete data.amount;
+	const selectedCategory = entryForm.querySelector("label:has(input[name=category]:checked)");
+	switch (selectedCategory.className) {
+		case 'expense':
+			data[me] = -amount;
+			data[you] = null;
+			break;
+		case 'income':
+			data[me] = amount;
+			data[you] = null;
+			break;
+		case 'transfer':
+			data[me] = -amount;
+			data[you] = amount;
+			break;
+		default:
+			alert("不正カテゴリー");
+			throw("Bad category");
+	}
+	return data;
+}
+
 entryForm.addEventListener("submit", (event) => {
 	event.preventDefault();
-	const data = Object.fromEntries(new FormData(entryForm));
-	data.amount = Number(data.amount)
+	const data = buildEntryData();
 	new Entry(data).send();
 	entryForm.reset();
 	entryForm.elements["category"].value = data.category;

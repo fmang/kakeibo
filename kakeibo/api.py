@@ -55,7 +55,8 @@ def connect(api_key: str):
 
 class Entry(BaseModel):
 	date: date
-	amount: int
+	riku: int | None
+	anju: int | None
 	remark: str
 	category: str
 
@@ -90,8 +91,8 @@ def send(entry: Entry, user: str = Depends(authenticate)):
 	log_entry(
 		entry.date.isoformat(),
 		entry.category,
-		entry.amount,
-		None, # TODO
+		entry.riku,
+		entry.anju,
 		entry.remark,
 		id,
 		datetime.now().isoformat(timespec='seconds'),
