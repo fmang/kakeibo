@@ -7,19 +7,19 @@
 
 <header>
 	<h1>家計簿</h1>
-	<button id="open-history-button" class="icon" title="履歴">
-		<svg id="open-history-button" class="button" title="履歴" viewBox="0 0 24 24">
+	<button id="openHistoryButton" class="icon" title="履歴">
+		<svg viewBox="0 0 24 24">
 			<!-- Material Design: history -->
 			<path d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
 		</svg>
 	</button>
-	<button id="select-picture-button" class="icon" title="アップロード">
+	<button id="selectPictureButton" class="icon" title="アップロード">
 		<svg viewBox="0 0 24 24">
 			<!-- Material Design: upload -->
 			<path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" />
 		</svg>
 	</button>
-	<button id="take-picture-button" class="icon primary" title="撮影" style="display:none">
+	<button id="takePictureButton" class="icon primary" title="撮影" style="display:none">
 		<svg viewBox="0 0 24 24">
 			<!-- Material Design: camera -->
 			<path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
@@ -37,7 +37,7 @@
 		<th>日付</th>
 		<td>
 			<input type="date" name="date" required />
-			<button type="button" id="set-today-button">今日</button>
+			<button type="button" onclick="this.form.date.value = today()">今日</button>
 		</td>
 
 		<tr>
@@ -53,12 +53,12 @@
 			<div class="categories">
 				<label class="expense"><input type="radio" name="category" value="日常" checked>日常</label>
 				<label class="expense"><input type="radio" name="category" value="道楽">道楽</label>
-				<label class="expense"><input type="radio" name="category" id="bill-category" value="月額">月額</label>
-				<label class="expense"><input type="radio" name="category" id="other-category" value="その他">その他</label>
+				<label class="expense"><input type="radio" name="category" onchange="billDialog.showModal()" value="月額">月額</label>
+				<label class="expense"><input type="radio" name="category" onchange="if (!this.form.remark.value) this.form.remark.focus()" value="その他">その他</label>
 			</div>
 			<div class="categories">
 				<label class="income"><input type="radio" name="category" value="給料">給料</label>
-				<label class="income"><input type="radio" name="category" id="income-category" value="収入">収入</label>
+				<label class="income"><input type="radio" name="category" onchange="if (!this.form.remark.value) this.form.remark.focus()" value="収入">収入</label>
 				<label class="transfer"><input type="radio" name="category" value="振込">振込</label>
 			</div>
 		</td>
@@ -80,7 +80,7 @@
 	</div>
 </form>
 
-<dialog id="bill-dialog">
+<dialog id="billDialog">
 	<h2>月額</h2>
 	<form name="bill">
 		<div class="categories">
@@ -103,9 +103,9 @@
 	</form>
 </dialog>
 
-<dialog id="history-dialog">
+<dialog id="historyDialog">
 	<h2>履歴</h2>
-	<table id="history-table"></table>
+	<table id="historyTable"></table>
 	<form class="actions">
 		<button class="icon" formmethod="dialog" title="閉じる">
 			<svg viewBox="0 0 24 24">

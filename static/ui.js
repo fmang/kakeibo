@@ -34,26 +34,25 @@ class LoadingState {
 
 const uploadForm = document.forms.upload;
 const pictureSelector = uploadForm.elements.picture;
-pictureSelector.addEventListener("change", (event) => { event.target.form.requestSubmit(); });
+pictureSelector.onchange = () => { uploadForm.requestSubmit(); };
 
-const selectPictureButton = document.getElementById("select-picture-button");
-selectPictureButton.addEventListener("click", (event) => {
+selectPictureButton.onclick = () => {
 	pictureSelector.removeAttribute("capture");
 	pictureSelector.showPicker();
-});
+};
 
-const takePictureButton = document.getElementById("take-picture-button");
 if (pictureSelector.capture) // Supporté par le navigateur.
 	takePictureButton.style.display = "inline";
-takePictureButton.addEventListener("click", (event) => {
+
+takePictureButton.onclick = () => {
 	pictureSelector.setAttribute("capture", "environment");
 	pictureSelector.showPicker();
-});
+};
 
 const uploadLoadingState = new LoadingState(selectPictureButton);
 const receiptQueue = [];
 
-uploadForm.addEventListener("submit", (event) => {
+uploadForm.onsubmit = (event) => {
 	event.preventDefault();
 	uploadLoadingState.increment();
 	selectPictureButton.classList.remove("error");
@@ -77,7 +76,7 @@ uploadForm.addEventListener("submit", (event) => {
 	}).finally(() => {
 		uploadLoadingState.decrement();
 	})
-});
+};
 
 function popReceipt() {
 	const receipt = receiptQueue.shift();
@@ -97,24 +96,19 @@ const dateField = entryForm.elements["date"];
 const amountField = entryForm.elements["amount"];
 const remarkField = entryForm.elements["remark"];
 
-entryForm.addEventListener("reset", (event) => {
+entryForm.onreset = () => {
 	dateField.defaultValue = today();
 	amountField.focus();
-});
+};
 entryForm.reset();
 
 let lastFocus = Date.now();
-document.addEventListener("focus", (event) => {
-	let now = Date.now();
+document.onfocus = () => {
+	const now = Date.now();
 	if (now - lastFocus > 3600 && !amountField.value && !remarkField.value)
 		entryForm.reset();
 	lastFocus = now;
-});
-
-const setTodayButton = document.getElementById("set-today-button");
-setTodayButton.addEventListener("click", (event) => {
-	dateField.value = today();
-});
+};
 
 /** Bâtit le JSON d’entrée à envoyer à l’API */
 function buildEntryData() {
@@ -142,48 +136,26 @@ function buildEntryData() {
 	return data;
 }
 
-entryForm.addEventListener("submit", (event) => {
+entryForm.onsubmit = () => {
 	event.preventDefault();
 	const data = buildEntryData();
 	new Entry(data).send();
 	entryForm.reset();
 	entryForm.elements["category"].value = data.category;
 	popReceipt();
-});
+};
 
-const billDialog = document.getElementById("bill-dialog");
-const billForm = document.forms.bill;
-billForm.addEventListener("submit", (event) => {
-	event.preventDefault();
+document.forms.bill.onsubmit = (event) => {
 	remarkField.value = event.submitter.value;
 	billDialog.close();
-});
+	return false;
+};
 
-const billCategory = document.getElementById("bill-category");
-billCategory.addEventListener("change", (event) => {
-	billDialog.showModal();
-});
-
-const otherCategory = document.getElementById("other-category");
-otherCategory.addEventListener("change", (event) => {
-	if (!remarkField.value)
-		remarkField.focus();
-});
-
-const incomeCategory = document.getElementById("income-category");
-incomeCategory.addEventListener("change", (event) => {
-	if (!remarkField.value)
-		remarkField.focus();
-});
-
-const historyDialog = document.getElementById("history-dialog");
-const openHistoryButton = document.getElementById("open-history-button");
-openHistoryButton.addEventListener("click", (event) => {
+openHistoryButton.onclick = () => {
 	historyDialog.showModal();
 	openHistoryButton.classList.remove("error");
-});
+};
 
-const historyTable = document.getElementById("history-table");
 const historyLoadingState = new LoadingState(openHistoryButton);
 const amountFormatter = Intl.NumberFormat("ja-JP", { signDisplay: "exceptZero" });
 
@@ -249,10 +221,10 @@ class Entry {
 
 		this.#withdrawButton = document.createElement("button");
 		this.#withdrawButton.innerText = "取消";
-		this.#withdrawButton.addEventListener("click", (event) => {
+		this.#withdrawButton.onclick = () => {
 			this.#withdrawButton.disabled = true;
 			this.withdraw();
-		});
+		};
 		this.#actionsCell.appendChild(this.#withdrawButton);
 	}
 
@@ -269,10 +241,10 @@ class Entry {
 
 		this.#resendButton = document.createElement("button");
 		this.#resendButton.innerText = "再試行";
-		this.#resendButton.addEventListener("click", (event) => {
+		this.#resendButton.onclick = () => {
 			this.#resendButton.disabled = true;
 			this.send();
-		});
+		};
 		this.#actionsCell.appendChild(this.#resendButton);
 	}
 

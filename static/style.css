@@ -117,19 +117,19 @@ dialog h2 {
 	margin: 0;
 }
 
-#history-dialog table {
+#historyDialog table {
 	margin: 0.5em 0;
 	width: 100%;
 }
 
-#history-dialog table:empty::after {
+#historyDialog table:empty::after {
 	content: "空";
 	display: block;
 	color: gray;
 	text-align: center;
 }
 
-#history-dialog td {
+#historyDialog td {
 	padding: 0.2em 0.5em;
 	white-space: nowrap;
 }
