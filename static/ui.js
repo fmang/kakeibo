@@ -79,10 +79,11 @@ uploadForm.onsubmit = (event) => {
 function popReceipt() {
 	const receipt = receiptQueue.shift();
 	if (!receipt)
-		return;
+		return false;
 
 	dateField.value = receipt.date;
 	amountField.value = receipt.total;
+	return true;
 }
 
 function today() {
@@ -138,9 +139,10 @@ entryForm.onsubmit = () => {
 	event.preventDefault();
 	const data = buildEntryData();
 	new Entry(data).send();
-	entryForm.reset();
-	entryForm.elements["category"].value = data.category;
-	popReceipt();
+	amountField.value = null;
+	remarkField.value = null;
+	if (!popReceipt())
+		amountField.focus();
 };
 
 document.forms.bill.onsubmit = (event) => {
