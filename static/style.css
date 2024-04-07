@@ -110,6 +110,7 @@ button.error {
 div.actions, form.actions {
 	display: flex;
 	justify-content: space-evenly;
+	gap: 1em;
 }
 
 dialog h2 {
