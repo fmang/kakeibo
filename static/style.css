@@ -142,3 +142,17 @@ tr.withdrawn { color: gray; }
 td.loading { color: darkblue; }
 td.success { color: darkgreen; }
 td.error { color: darkred; }
+
+#openHistoryButton, #submitEntryButton {
+	z-index: 2;
+}
+
+.plane {
+	z-index: 1;
+	margin: -0.5em;
+	width: 1em;
+	height: 1em;
+	background-color: darkblue;
+	border-radius: 100%;
+	transition: 0.7s;
+}

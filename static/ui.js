@@ -139,6 +139,7 @@ entryForm.onsubmit = () => {
 	event.preventDefault();
 	const data = buildEntryData();
 	new Entry(data).send();
+	flyPlane();
 	amountField.value = null;
 	remarkField.value = null;
 	if (!popReceipt())
@@ -284,5 +285,30 @@ class Entry {
 		if (!historyDialog.open)
 			openHistoryButton.classList.add("error");
 		this.#withdrawButton.disabled = false;
+	}
+}
+
+/*
+ * L’avion est une petite icône qui se déplace du bouton d’envoi vers le bouton
+ * d’historique, pour offrir un retour visuel. Comme le traitement est
+ * asynchrone, le bouton ne se bloque pas.
+ */
+
+let plane = null;
+
+function flyPlane() {
+	plane?.remove();
+	plane = document.createElement("span");
+	plane.className = "plane";
+	centerTo(plane, submitEntryButton);
+	document.body.appendChild(plane);
+	centerTo(plane, openHistoryButton);
+}
+
+function centerTo(element, reference) {
+	with (reference) {
+		element.style.position = "absolute";
+		element.style.top = offsetTop + offsetHeight / 2 + "px";
+		element.style.left = offsetLeft + offsetWidth / 2 + "px";
 	}
 }
