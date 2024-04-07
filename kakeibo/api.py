@@ -80,7 +80,7 @@ def generate_id():
 
 
 def log_entry(*row):
-	with open('log.tsv', 'a') as log:
+	with open('log.tsv', 'a', newline='') as log:
 		writer = csv.writer(log, dialect='excel-tab')
 		writer.writerow(row)
 
@@ -120,6 +120,43 @@ def withdraw(withdrawal: Withdrawal, user: str = Depends(authenticate)):
 	)
 
 	return {}
+
+
+@api.get('/download')
+def download(user: str = Depends(authenticate)):
+	"""
+	Compile le journal en rapport TSV. Les métadonnées comme l’ID, la date
+	d’ajout et l’auteur sont omises. Quand deux lignes ont le même ID, la
+	dernière l’emporte. Le fichier généré est ensuite archivé dans
+	downloads/ puis on propose à l’utilisateur de le télécharger.
+	"""
+	entries = {}
+	with open('log.tsv', newline='') as log:
+		reader = csv.reader(log, dialect='excel-tab')
+		for index, row in enumerate(reader, start=1):
+			# Quand une ligne n’a pas d’ID, on lui en génère un
+			# artificiel. Il doit être unique et ne pas faire
+			# conflit avec les vrais ID.
+			id = row[5] if len(row) >= 6 else -index
+
+			# Le journal modélise la suppression en ajoutant une
+			# ligne avec les 5 premières colonnes vides, puis l’ID
+			# de la ligne à supprimer.
+			gist = row[0:5]
+			if any(gist):
+				entries[id] = gist
+			else:
+				del entries[id]
+
+	os.makedirs('downloads', exist_ok=True)
+	report_name = f"kakeibo-{date.today().isoformat()}.tsv"
+	report_path = f"downloads/{report_name}"
+	with open(report_path, 'w', newline='') as report:
+		writer = csv.writer(report, dialect='excel-tab')
+		for entry in sorted(entries.values()):
+			writer.writerow(entry)
+
+	return FileResponse(report_path, filename=report_name)
 
 
 @api.post('/upload')
