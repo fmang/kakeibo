@@ -28,6 +28,11 @@ takePictureButton.onclick = () => {
 
 const receiptQueue = [];
 
+function updateQueueCounter() {
+	queueCounter.innerText = `あと ${receiptQueue.length} 枚`;
+	queueCounter.style.display = (receiptQueue.length == 0) ? 'none' : 'inline';
+}
+
 uploadForm.onsubmit = (event) => {
 	event.preventDefault();
 	selectPictureButton.disabled = true;
@@ -44,6 +49,7 @@ uploadForm.onsubmit = (event) => {
 	}).then((json) => {
 		for (const receipt of json.receipts)
 			receiptQueue.push(receipt);
+		updateQueueCounter();
 		if (!amountField.value)
 			popReceipt();
 	}).catch((error) => {
@@ -61,6 +67,7 @@ function popReceipt() {
 
 	dateField.value = receipt.date;
 	amountField.value = receipt.total;
+	updateQueueCounter();
 	return true;
 }
 
@@ -160,16 +167,16 @@ class HistoryEntry {
 		this.data = data;
 
 		const dateCell = document.createElement("td");
-		dateCell.className = "numeric";
+		dateCell.style.textAlign = "right";
 		dateCell.innerText = data.date.replace(/^\d+-0?(\d+)-0?(\d+)$/, "$1月$2日");
 
 		const amountCell = document.createElement("td");
-		amountCell.className = "numeric";
+		dateCell.style.textAlign = "right";
 		amountCell.innerText = amountFormatter.format(data[me]) + "円";
 		amountCell.title = data.category;
 
 		const actionsCell = document.createElement("td");
-		actionsCell.className = "actions";
+		dateCell.style.textAlign = "right";
 		this.#withdrawButton = document.createElement("button");
 		this.#withdrawButton.innerText = "取消";
 		this.#withdrawButton.onclick = () => { this.withdraw(); };

@@ -109,7 +109,7 @@ button:disabled {
 .categories .income { background-color: lavender; }
 .categories .transfer { background-color: lavender; }
 
-div.actions, form.actions {
+.actions {
 	display: flex;
 	justify-content: space-evenly;
 	gap: 1em;
@@ -135,10 +135,6 @@ dialog h2 {
 #historyDialog td {
 	padding: 0.2em 0.5em;
 	white-space: nowrap;
-}
-
-td.numeric, td.actions {
-	text-align: right;
 }
 
 tr.withdrawn { color: gray; }
