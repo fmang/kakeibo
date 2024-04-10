@@ -1,2 +1,75 @@
 <!doctype html>
-Hello!
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width" />
+<link rel="manifest" href="manifest.json" />
+<title>家計簿へようこそ</title>
+
+<style>
+body {
+	font-size: 24px;
+	margin: 3em;
+}
+
+#logo {
+	margin: 1em;
+	position: relative;
+}
+
+#logo::after {
+	position: absolute;
+	content: "";
+	left: 0px;
+	top: 0px;
+	height: 100%;
+	width: 100%;
+	background: linear-gradient(transparent, white 400px, white) no-repeat;
+	background-size: 100% 800px;
+	animation: Logo 5s linear forwards;
+}
+
+@keyframes Logo {
+	from { background-position: 0 -400px; }
+	to { background-position: 0 400px; }
+}
+
+#subtitle {
+	font-size: 2em;
+	opacity: 0%;
+	animation: Subtitle 0.5s ease forwards;
+	animation-delay: 4s;
+	display: flex;
+	height: 2em;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5em;
+}
+
+@keyframes Subtitle {
+	from { opacity: 0%; }
+	to { opacity: 100%; }
+}
+
+#version {
+	color: transparent;
+	animation: Version 1s ease forwards;
+	animation-delay: 5s;
+	font-weight: bold;
+}
+
+@keyframes Version {
+	0% { opacity: 0%; }
+	10% { opacity: 100%; }
+	45% { font-size: 2em; color: red; }
+	55% { font-size: 2em; color: red; }
+	100% { color: black; }
+}
+</style>
+
+<center id="logo">
+	<img src="logo.webp" />
+</center>
+
+<center id="subtitle">
+	ザ・アプリ
+	<span id="version">2</span>
+</center>
