@@ -13,25 +13,6 @@ switch (me) {
 	default: document.location = 'welcome.html';
 }
 
-class LoadingState {
-	#counter = 0;
-
-	constructor(button) {
-		this.button = button;
-	}
-
-	increment() {
-		this.#counter += 1;
-		this.button.classList.add("loading");
-	}
-
-	decrement() {
-		this.#counter -= 1;
-		if (this.#counter == 0)
-			this.button.classList.remove("loading");
-	}
-}
-
 selectPictureButton.onclick = () => {
 	pictureSelector.removeAttribute("capture");
 	pictureSelector.showPicker();
@@ -45,12 +26,12 @@ takePictureButton.onclick = () => {
 	pictureSelector.showPicker();
 };
 
-const uploadLoadingState = new LoadingState(selectPictureButton);
 const receiptQueue = [];
 
 uploadForm.onsubmit = (event) => {
 	event.preventDefault();
-	uploadLoadingState.increment();
+	selectPictureButton.disabled = true;
+	takePictureButton.disabled = true;
 
 	fetch("api/upload", {
 		method: "POST",
@@ -68,7 +49,8 @@ uploadForm.onsubmit = (event) => {
 	}).catch((error) => {
 		alert(error.message);
 	}).finally(() => {
-		uploadLoadingState.decrement();
+		selectPictureButton.disabled = false;
+		takePictureButton.disabled = false;
 	})
 };
 
