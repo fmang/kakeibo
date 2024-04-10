@@ -46,16 +46,17 @@ button:disabled {
 }
 
 button.icon {
-	border-radius: 100%;
+	display: inline-flex;
+	align-self: center;
+	border-radius: 500px;
 }
 
-button.icon svg {
-	height: 1.6em;
-	vertical-align: middle;
-}
+button.icon svg { height: 1.5em; }
+button.icon span { padding: 0.1em 0.2em; }
 
 button.primary {
 	background-color: forestgreen;
+	color: white;
 	fill: white;
 }
 

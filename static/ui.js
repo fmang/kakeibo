@@ -42,7 +42,7 @@ selectPictureButton.onclick = () => {
 };
 
 if (pictureSelector.capture) // Supporté par le navigateur.
-	takePictureButton.style.display = "inline";
+	takePictureButton.style.display = "inline-flex";
 
 takePictureButton.onclick = () => {
 	pictureSelector.setAttribute("capture", "environment");
