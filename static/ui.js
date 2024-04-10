@@ -32,10 +32,6 @@ class LoadingState {
 	}
 }
 
-const uploadForm = document.forms.upload;
-const pictureSelector = uploadForm.elements.picture;
-pictureSelector.onchange = () => { uploadForm.requestSubmit(); };
-
 selectPictureButton.onclick = () => {
 	pictureSelector.removeAttribute("capture");
 	pictureSelector.showPicker();
@@ -89,11 +85,6 @@ function popReceipt() {
 function today() {
 	return new Date().toISOString().split("T")[0];
 }
-
-const entryForm = document.forms["entry"];
-const dateField = entryForm.elements["date"];
-const amountField = entryForm.elements["amount"];
-const remarkField = entryForm.elements["remark"];
 
 entryForm.onreset = () => {
 	dateField.defaultValue = today();
