@@ -128,13 +128,33 @@ function buildEntryData() {
 
 entryForm.onsubmit = () => {
 	event.preventDefault();
+	submitEntryButton.disabled = true;
 	const data = buildEntryData();
-	new Entry(data).send();
-	flyPlane();
-	amountField.value = null;
-	remarkField.value = null;
-	if (!popReceipt())
-		amountField.focus();
+
+	fetch("api/send", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(data),
+	}).then((response) => {
+		if (response.ok)
+			return response.json();
+		else
+			throw new Error("HTTP " + response.status);
+	}).then((json) => {
+		data.id = json['id'];
+		new HistoryEntry(data);
+		flyPlane();
+		// Réinitialise seulement partiellement le formulaire pour
+		// faciliter l’ajout de reçus similaires.
+		amountField.value = null;
+		remarkField.value = null;
+		if (!popReceipt())
+			amountField.focus();
+	}).catch((error) => {
+		alert(error.message);
+	}).finally(() => {
+		submitEntryButton.disabled = false;
+	})
 };
 
 document.forms.bill.onsubmit = (event) => {
@@ -148,14 +168,10 @@ openHistoryButton.onclick = () => {
 	openHistoryButton.classList.remove("error");
 };
 
-const historyLoadingState = new LoadingState(openHistoryButton);
 const amountFormatter = Intl.NumberFormat("ja-JP", { signDisplay: "exceptZero" });
 
-class Entry {
+class HistoryEntry {
 	#row;
-	#statusCell;
-	#actionsCell;
-	#resendButton;
 	#withdrawButton;
 
 	constructor(data) {
@@ -164,86 +180,28 @@ class Entry {
 		const dateCell = document.createElement("td");
 		dateCell.className = "numeric";
 		dateCell.innerText = data.date.replace(/^\d+-0?(\d+)-0?(\d+)$/, "$1月$2日");
+
 		const amountCell = document.createElement("td");
 		amountCell.className = "numeric";
 		amountCell.innerText = amountFormatter.format(data[me]) + "円";
 		amountCell.title = data.category;
-		this.#statusCell = document.createElement("td");
-		this.#actionsCell = document.createElement("td");
-		this.#actionsCell.className = "actions";
+
+		const actionsCell = document.createElement("td");
+		actionsCell.className = "actions";
+		this.#withdrawButton = document.createElement("button");
+		this.#withdrawButton.innerText = "取消";
+		this.#withdrawButton.onclick = () => { this.withdraw(); };
+		actionsCell.appendChild(this.#withdrawButton);
 
 		this.#row = document.createElement("tr");
 		this.#row.appendChild(dateCell);
 		this.#row.appendChild(amountCell);
-		this.#row.appendChild(this.#statusCell);
-		this.#row.appendChild(this.#actionsCell);
+		this.#row.appendChild(actionsCell);
 		historyTable.appendChild(this.#row);
 	}
 
-	send() {
-		this.#statusCell.innerText = "送信中";
-		this.#statusCell.className = "loading";
-		historyLoadingState.increment();
-
-		fetch("api/send", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(this.data),
-		}).then((response) => {
-			if (response.ok)
-				return response.json();
-			else
-				throw new Error("HTTP " + response.status);
-		}).then((json) => {
-			this.#onSuccess(json['id']);
-		}).catch((error) => {
-			alert(error.message);
-			this.#onError();
-		}).finally(() => {
-			historyLoadingState.decrement();
-		})
-	}
-
-	#onSuccess(id) {
-		this.data.id = id;
-		this.#statusCell.innerText = "送信済";
-		this.#statusCell.className = "success";
-
-		this.#resendButton?.remove()
-
-		this.#withdrawButton = document.createElement("button");
-		this.#withdrawButton.innerText = "取消";
-		this.#withdrawButton.onclick = () => {
-			this.#withdrawButton.disabled = true;
-			this.withdraw();
-		};
-		this.#actionsCell.appendChild(this.#withdrawButton);
-	}
-
-	#onError() {
-		this.#statusCell.innerText = "失敗";
-		this.#statusCell.className = "error";
-		if (!historyDialog.open)
-			openHistoryButton.classList.add("error");
-
-		if (this.#resendButton) {
-			this.#resendButton.disabled = false;
-			return;
-		}
-
-		this.#resendButton = document.createElement("button");
-		this.#resendButton.innerText = "再試行";
-		this.#resendButton.onclick = () => {
-			this.#resendButton.disabled = true;
-			this.send();
-		};
-		this.#actionsCell.appendChild(this.#resendButton);
-	}
-
 	withdraw() {
-		this.#statusCell.innerText = "取消中";
-		this.#statusCell.className = "loading";
-		historyLoadingState.increment();
+		this.#withdrawButton.disabled = true;
 
 		fetch("api/withdraw", {
 			method: "POST",
@@ -255,27 +213,14 @@ class Entry {
 			else
 				throw new Error("HTTP " + response.status);
 		}).then((json) => {
-			this.#onWithdrawalSuccess();
+			this.#row.classList.add("withdrawn");
+			this.#withdrawButton.style.visibility = "hidden";
 		}).catch((error) => {
 			alert(error.message);
-			this.#onWithdrawalError();
-		}).finally(() => {
-			historyLoadingState.decrement();
+			if (!historyDialog.open)
+				openHistoryButton.classList.add("error");
+			this.#withdrawButton.disabled = false;
 		})
-	}
-
-	#onWithdrawalSuccess() {
-		this.#statusCell.innerText = "取消済";
-		this.#statusCell.className = "success";
-		this.#row.classList.add("withdrawn");
-	}
-
-	#onWithdrawalError() {
-		this.#statusCell.innerText = "取消失敗";
-		this.#statusCell.className = "error";
-		if (!historyDialog.open)
-			openHistoryButton.classList.add("error");
-		this.#withdrawButton.disabled = false;
 	}
 }
 

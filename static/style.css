@@ -40,11 +40,6 @@ button:hover {
 	background-color: gainsboro;
 }
 
-button:disabled {
-	color: gray;
-	background-color: white;
-}
-
 button.icon {
 	display: inline-flex;
 	align-self: center;
@@ -60,7 +55,7 @@ button.primary {
 	fill: white;
 }
 
-button.primary:hover {
+button.primary:hover:not(:disabled) {
 	background-color: darkgreen;
 }
 
@@ -72,6 +67,12 @@ button.loading {
 button.error {
 	background-color: darkred;
 	fill: white;
+}
+
+button:disabled {
+	background-color: gainsboro;
+	color: gray;
+	fill: gray;
 }
 
 .categories {
