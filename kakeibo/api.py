@@ -6,7 +6,7 @@ import time
 
 from datetime import date, datetime
 from fastapi import FastAPI, UploadFile, Depends, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.security import APIKeyCookie
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -48,7 +48,7 @@ def connect(api_key: str):
 		response = FileResponse('static/welcome.html')
 		response.set_cookie(key='kakeibo_api_key', value=api_key, secure=True, httponly=True)
 		response.set_cookie(key='kakeibo_user', value=user)
-		return response
+		return RedirectResponse('../welcome.html', status_code=303)
 	else:
 		raise HTTPException(401)
 
