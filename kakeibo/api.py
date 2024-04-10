@@ -45,10 +45,10 @@ def authenticate(api_key: str = Depends(api_key_cookie)) -> str:
 @api.get('/connect')
 def connect(api_key: str):
 	if user := API_KEYS.get(api_key):
-		response = FileResponse('static/welcome.html')
+		response = RedirectResponse('../welcome.html', status_code=303)
 		response.set_cookie(key='kakeibo_api_key', value=api_key, secure=True, httponly=True)
 		response.set_cookie(key='kakeibo_user', value=user)
-		return RedirectResponse('../welcome.html', status_code=303)
+		return response
 	else:
 		raise HTTPException(401)
 

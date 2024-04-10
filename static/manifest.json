@@ -1,4 +1,5 @@
 {
 	"name": "家計簿",
-	"display": "standalone"
+	"display": "standalone",
+	"start_url": "."
 }
