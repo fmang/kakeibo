@@ -10,18 +10,18 @@ import re
 import kakeibo.classifier
 
 
-DATE_REGEX = re.compile(r'(\d{4})[年／・](\d{1,2})[月／・](\d{1,2})')
+DATE_REGEX = re.compile(r'\b(20\d\d)\D([01]?\d)\D([0123]?\d)\b')
 
 # 言偏 est un peu difficile à lire par sa complexité, mais il est peu probable
 # qu’on se trouve sur le +, ou qu’une autre lettre vienne s’intercaler.
-TOTAL_REGEX = re.compile(r'^合(?:計|言十|�十).*￥([\d・]+)$', re.MULTILINE)
+TOTAL_REGEX = re.compile(r'^合(?:計|言十|�十).*￥(\d+(?:\D?\d{3})*)$', re.MULTILINE)
 
 # Répertorie les magasins connus sous forme de triplet (catégorie, nom, regex).
 # La regex prendra typiquement le numéro de téléphone qui fournit un critère
 # facilement repérable en utilisant le modèle de chiffres, plus fiable que la
 # reconnaissance de lettres.
 STORES = [
-	['日常', 'ドコカノミセ', re.compile(r'01.2345.6789')],
+	['日常', 'ドコカノミセ', re.compile(r'01\D2345\D6789')],
 ]
 
 
@@ -32,7 +32,7 @@ def parse_receipt(text):
 		data['date'] = '%d-%02d-%02d' % (int(m[1]), int(m[2]), int(m[3]))
 
 	if (m := re.search(TOTAL_REGEX, text)):
-		data['amount'] = int(m[1].replace('・', ''))
+		data['amount'] = int(''.join(filter(str.isdigit, m[1])))
 
 	for (category, name, regex) in STORES:
 		if re.search(regex, text):
