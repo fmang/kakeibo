@@ -96,7 +96,7 @@ entry.reset();
 // focus et qu’il n’y a pas de données pré-remplies, on reset le form pour
 // avoir la date courante et la catégorie par défaut.
 let lastFocus = Date.now();
-document.onfocus = () => {
+window.onfocus = () => {
 	const now = Date.now();
 	if (now - lastFocus > 3600000 && !entry.amount.value && !entry.remark.value)
 		entry.reset();
