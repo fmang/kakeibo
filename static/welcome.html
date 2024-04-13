@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
-<link rel="manifest" href="manifest.json" />
+<link rel="manifest" id="manifest" />
 <title>家計簿へようこそ</title>
 
 <style>
@@ -74,3 +74,14 @@ body {
 	ザ・アプリ
 	<span id="version">2</span>
 </center>
+
+<script>
+const manifest = {
+	"name": "家計簿",
+	"display": "standalone",
+	"start_url": new URL(`.${document.location.hash}`, document.location),
+};
+
+document.getElementById("manifest").href =
+	`data:application/json,${encodeURIComponent(JSON.stringify(manifest))}`;
+</script>
