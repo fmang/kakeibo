@@ -65,8 +65,13 @@ function popReceipt() {
 	if (!receipt)
 		return false;
 
-	dateField.value = receipt.date;
-	amountField.value = receipt.total;
+	with (entryForm) {
+		date.value = receipt.date;
+		amount.value = receipt.amount;
+		remark.value = receipt.remark || '';
+		if (receipt.category) category.value = receipt.category;
+	}
+
 	updateQueueCounter();
 	return true;
 }

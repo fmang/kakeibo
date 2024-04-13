@@ -16,13 +16,30 @@ DATE_REGEX = re.compile(r'(\d{4})[年／・](\d{1,2})[月／・](\d{1,2})')
 # qu’on se trouve sur le +, ou qu’une autre lettre vienne s’intercaler.
 TOTAL_REGEX = re.compile(r'^合(?:計|言十|�十).*￥([\d・]+)$', re.MULTILINE)
 
+# Répertorie les magasins connus sous forme de triplet (catégorie, nom, regex).
+# La regex prendra typiquement le numéro de téléphone qui fournit un critère
+# facilement repérable en utilisant le modèle de chiffres, plus fiable que la
+# reconnaissance de lettres.
+STORES = [
+	['日常', 'ドコカノミセ', re.compile(r'01.2345.6789')],
+]
+
 
 def parse_receipt(text):
 	data = {}
+
 	if (m := re.search(DATE_REGEX, text)):
 		data['date'] = '%d-%02d-%02d' % (int(m[1]), int(m[2]), int(m[3]))
+
 	if (m := re.search(TOTAL_REGEX, text)):
-		data['total'] = int(m[1].replace('・', ''))
+		data['amount'] = int(m[1].replace('・', ''))
+
+	for (category, name, regex) in STORES:
+		if re.search(regex, text):
+			data['category'] = category
+			data['remark'] = name
+			break
+
 	return data or None
 
 
@@ -47,8 +64,8 @@ if __name__ == '__main__':
 	receipts = scan_pictures(*args.pictures)
 
 	if args.format == 'json':
-		json.dump(receipts, sys.stdout, indent='\t')
+		json.dump(receipts, sys.stdout, indent='\t', ensure_ascii=False)
 		print()
 	elif args.format == 'tsv':
 		for r in receipts:
-			print(f"%s\t%s" % (r.get('date', ''), r.get('total', '')))
+			print(f"%s\t%s" % (r.get('date', ''), r.get('amount', '')))
