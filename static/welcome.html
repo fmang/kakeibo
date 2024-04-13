@@ -25,7 +25,7 @@ body {
 	width: 100%;
 	background: linear-gradient(transparent, white 400px, white) no-repeat;
 	background-size: 100% 800px;
-	animation: Logo 5s linear forwards;
+	animation: Logo 5s linear both;
 }
 
 @keyframes Logo {
@@ -35,8 +35,7 @@ body {
 
 #subtitle {
 	font-size: 2em;
-	opacity: 0%;
-	animation: Subtitle 0.3s ease forwards;
+	animation: Subtitle both;
 	animation-delay: 4s;
 	display: flex;
 	height: 2em;
@@ -46,22 +45,21 @@ body {
 }
 
 @keyframes Subtitle {
-	from { opacity: 0%; }
-	to { opacity: 100%; }
+	from { visibility: hidden; }
+	to { visibility: visible; }
 }
 
 #version {
 	color: transparent;
 	animation: Version 1s ease forwards;
-	animation-delay: 5.5s;
+	animation-delay: 5s;
 	font-weight: bold;
 }
 
 @keyframes Version {
-	0% { opacity: 0%; }
-	10% { opacity: 100%; }
-	45% { font-size: 2em; color: red; }
-	55% { font-size: 2em; color: red; }
+	0% { color: black; }
+	40% { font-size: 2em; color: orange; }
+	60% { font-size: 2em; color: orange; }
 	100% { color: black; }
 }
 </style>
