@@ -50,7 +50,7 @@ uploadForm.onsubmit = (event) => {
 		for (const receipt of json.receipts)
 			receiptQueue.push(receipt);
 		updateQueueCounter();
-		if (!amountField.value)
+		if (!entry.amount.value)
 			popReceipt();
 	}).catch((error) => {
 		alert(error.message);
@@ -65,12 +65,11 @@ function popReceipt() {
 	if (!receipt)
 		return false;
 
-	with (entryForm) {
-		date.value = receipt.date;
-		amount.value = receipt.amount;
-		remark.value = receipt.remark || '';
-		if (receipt.category) category.value = receipt.category;
-	}
+	entry.date.value = receipt.date;
+	entry.amount.value = receipt.amount;
+	entry.remark.value = receipt.remark || '';
+	if (receipt.category)
+		entry.category.value = receipt.category;
 
 	updateQueueCounter();
 	return true;
@@ -80,26 +79,26 @@ function today() {
 	return new Date().toISOString().split("T")[0];
 }
 
-entryForm.onreset = () => {
-	dateField.defaultValue = today();
-	amountField.focus();
+entry.onreset = () => {
+	entry.date.defaultValue = today();
+	entry.amount.focus();
 };
-entryForm.reset();
+entry.reset();
 
 let lastFocus = Date.now();
 document.onfocus = () => {
 	const now = Date.now();
-	if (now - lastFocus > 3600 && !amountField.value && !remarkField.value)
-		entryForm.reset();
+	if (now - lastFocus > 3600 && !entry.amount.value && !entry.remark.value)
+		entry.reset();
 	lastFocus = now;
 };
 
 /** Bâtit le JSON d’entrée à envoyer à l’API */
 function buildEntryData() {
-	const data = Object.fromEntries(new FormData(entryForm));
+	const data = Object.fromEntries(new FormData(entry));
 	const amount = Number(data.amount);
 	delete data.amount;
-	const selectedCategory = entryForm.querySelector("label:has(input[name=category]:checked)");
+	const selectedCategory = entry.querySelector("label:has(input[name=category]:checked)");
 	switch (selectedCategory.className) {
 		case 'expense':
 			data[me] = -amount;
@@ -120,7 +119,7 @@ function buildEntryData() {
 	return data;
 }
 
-entryForm.onsubmit = () => {
+entry.onsubmit = () => {
 	event.preventDefault();
 	submitEntryButton.disabled = true;
 	const data = buildEntryData();
@@ -140,10 +139,10 @@ entryForm.onsubmit = () => {
 		flyPlane();
 		// Réinitialise seulement partiellement le formulaire pour
 		// faciliter l’ajout de reçus similaires.
-		amountField.value = null;
-		remarkField.value = null;
+		entry.amount.value = null;
+		entry.remark.value = null;
 		if (!popReceipt())
-			amountField.focus();
+			entry.amount.focus();
 	}).catch((error) => {
 		alert(error.message);
 	}).finally(() => {
@@ -152,7 +151,7 @@ entryForm.onsubmit = () => {
 };
 
 document.forms.bill.onsubmit = (event) => {
-	remarkField.value = event.submitter.value;
+	entry.remark.value = event.submitter.value;
 	billDialog.close();
 	return false;
 };

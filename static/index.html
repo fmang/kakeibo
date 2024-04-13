@@ -31,22 +31,22 @@
 	<input type="file" name="picture" id="pictureSelector" style="display:none" accept="image/*" capture="environment" onchange="this.form.requestSubmit()" />
 </form>
 
-<form id="entryForm">
+<form id="entry">
 	<table>
 		<tr>
 		<th>日付</th>
 		<td>
-			<input type="date" name="date" id="dateField" required />
+			<input type="date" name="date" required />
 			<button type="button" onclick="this.form.date.value = today()">今日</button>
 		</td>
 
 		<tr>
 		<th>金額</th>
-		<td><input type="number" name="amount" id="amountField" required /></td>
+		<td><input type="number" name="amount" required /></td>
 
 		<tr>
 		<th>備考</th>
-		<td><input type="text" name="remark" id="remarkField" /></td>
+		<td><input type="text" name="remark" /></td>
 
 		<tr>
 		<td colspan="2">
@@ -54,11 +54,11 @@
 				<label class="expense"><input type="radio" name="category" value="日常" checked>日常</label>
 				<label class="expense"><input type="radio" name="category" value="道楽">道楽</label>
 				<label class="expense"><input type="radio" name="category" onchange="billDialog.showModal()" value="月額">月額</label>
-				<label class="expense"><input type="radio" name="category" onchange="if (!remarkField.value) remarkField.focus()" value="その他">その他</label>
+				<label class="expense"><input type="radio" name="category" onchange="if (!entry.remark.value) entry.remark.focus()" value="その他">その他</label>
 			</div>
 			<div class="categories">
 				<label class="income"><input type="radio" name="category" value="給料">給料</label>
-				<label class="income"><input type="radio" name="category" onchange="if (!remarkField.value) remarkField.focus()" value="収入">収入</label>
+				<label class="income"><input type="radio" name="category" onchange="if (!entry.remark.value) entry.remark.focus()" value="収入">収入</label>
 				<label class="transfer"><input type="radio" name="category" value="振込">振込</label>
 			</div>
 		</td>
