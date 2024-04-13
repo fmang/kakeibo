@@ -7,9 +7,10 @@ import time
 from datetime import date, datetime
 from fastapi import FastAPI, UploadFile, Depends, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
-from fastapi.security import APIKeyCookie
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from typing import Annotated
 
 import kakeibo.receipt
 
@@ -31,24 +32,13 @@ def load_api_keys():
 
 
 API_KEYS = load_api_keys()
-api_key_cookie = APIKeyCookie(name='kakeibo_api_key')
+security = HTTPBearer()
 
 
-def authenticate(api_key: str = Depends(api_key_cookie)) -> str:
+def authenticate(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> str:
 	"""Authentifie et renvoie l’utilisateur connecté."""
-	if user := API_KEYS.get(api_key):
+	if user := API_KEYS.get(credentials.credentials):
 		return user
-	else:
-		raise HTTPException(401)
-
-
-@api.get('/connect')
-def connect(api_key: str):
-	if user := API_KEYS.get(api_key):
-		response = RedirectResponse('../welcome.html', status_code=303)
-		response.set_cookie(key='kakeibo_api_key', value=api_key, secure=True, httponly=True)
-		response.set_cookie(key='kakeibo_user', value=user)
-		return response
 	else:
 		raise HTTPException(401)
 

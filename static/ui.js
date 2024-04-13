@@ -1,11 +1,16 @@
-function getCookie(name) {
-	for (const cookie of document.cookie.split("; ")) {
-		const [key, value] = cookie.split("=", 2);
-		if (key == name) return value;
-	}
-}
+/*
+ * Authentification
+ * ----------------
+ *
+ * On récupère la clé d’API et l’utilisateur courant depuis le fragment de
+ * l’URL. Il doit être de la forme `user:api_key`. L’utilisateur ne sert pas à
+ * l’authentification mais permet de savoir qui paie. Le vrai utilisateur est
+ * noté dans le journal côté API.
+ *
+ */
 
-const me = getCookie("kakeibo_user");
+const [me, api_key] = document.location.hash.substring(1).split(":");
+
 let you;
 switch (me) {
 	case 'riku': you = 'anju'; break;
@@ -40,6 +45,7 @@ uploadForm.onsubmit = (event) => {
 
 	fetch("api/upload", {
 		method: "POST",
+		headers: { 'Authorization': `Bearer ${api_key}` },
 		body: new FormData(uploadForm),
 	}).then((response) => {
 		if (response.ok)
@@ -132,7 +138,10 @@ entry.onsubmit = () => {
 
 	fetch("api/send", {
 		method: "POST",
-		headers: { "Content-Type": "application/json" },
+		headers: {
+			'Authorization': `Bearer ${api_key}`,
+			"Content-Type": "application/json",
+		},
 		body: JSON.stringify(data),
 	}).then((response) => {
 		if (response.ok)
@@ -204,7 +213,10 @@ class HistoryEntry {
 
 		fetch("api/withdraw", {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				'Authorization': `Bearer ${api_key}`,
+				"Content-Type": "application/json",
+			},
 			body: JSON.stringify({ id: this.data.id }),
 		}).then((response) => {
 			if (response.ok)
