@@ -49,7 +49,7 @@ def scan_pictures(*pictures_paths):
 		model = pickle.load(f)
 
 	decoded_io = io.StringIO()
-	with subprocess.Popen(['receipt-scanner', '--', *pictures_paths], stdout=subprocess.PIPE, text=True) as scanner:
+	with subprocess.Popen(['./receipt-scanner', '--', *pictures_paths], stdout=subprocess.PIPE, text=True) as scanner:
 		kakeibo.classifier.decode(model, input=scanner.stdout, output=decoded_io)
 
 	text = decoded_io.getvalue()

@@ -2,8 +2,7 @@
 
 # Ce script s’attend à ce que le dossier t/ contienne des photos intitulées
 # {DATE}Y{TOTAL}+….jpg, par exemple 2024-02-09Y13841+2024-02-09Y1144.jpg. Il
-# doit être exécuté depuis la racine du projet et avoir receipt-scanner dans
-# son PATH.
+# doit être exécuté depuis la racine du projet.
 
 my @wanted;
 for my $name (<t/*.jpg>) {
