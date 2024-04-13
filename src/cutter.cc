@@ -227,6 +227,26 @@ std::vector<quad> find_receipts_ex(cv::Mat source, int saturation_threshold)
 }
 
 /**
+ * Renvoie un score correspondant à la qualité des candidats. La partie entière
+ * correspond au nombre d’éléments, et la fraction à la moyenne du sinus des
+ * angles. Autrement dit, plus les angles sont droits et plus on est content.
+ */
+static double evaluate_candidate(const std::vector<quad>& candidate)
+{
+	double sinus_sum = 0;
+	size_t angles_count = 0;
+	for (const quad& q : candidate) {
+		for (size_t i = 0; i < 4; ++i) {
+			cv::Point a = q.corners[i];
+			cv::Point b = q.corners[(i + 1) % 4];
+			sinus_sum += a.cross(b) / cv::norm(a) / cv::norm(b);
+			++angles_count;
+		}
+	}
+	return candidate.size() + sinus_sum / angles_count;
+}
+
+/**
  * Renvoie la liste des countours des reçus trouvés. On tente plusieurs niveau
  * de saturation car selon que l’image a été prise dans un environnement clair
  * ou un peu ombré, le seuil utile pour avoir les meilleurs résultats varie.
@@ -234,10 +254,14 @@ std::vector<quad> find_receipts_ex(cv::Mat source, int saturation_threshold)
 std::vector<quad> find_receipts(cv::Mat source)
 {
 	std::vector<quad> best_result;
+	double best_score = 0;
 	for (int threshold = 16; threshold <= 48; threshold += 16) {
 		std::vector<quad> candidate = find_receipts_ex(source, threshold);
-		if (candidate.size() > best_result.size())
+		double score = evaluate_candidate(candidate);
+		if (score > best_score) {
 			best_result = std::move(candidate);
+			best_score = score;
+		}
 	}
 	return best_result;
 }
