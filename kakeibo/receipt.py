@@ -17,27 +17,20 @@ DATE_REGEX = re.compile(r'\b(20\d\d)\D([01]?\d)\D([0123]?\d)\b')
 # qu’on se trouve sur le +, ou qu’une autre lettre vienne s’intercaler.
 TOTAL_REGEX = re.compile(r'^合(?:計|言十|�十).*￥(\d+(?:\D?\d{3})*)$', re.MULTILINE)
 
-# Le numéro de téléphone permet d’identifier le magasin. Il semblerait que les
-# numéros de téléphones des magasins soient de la forme 03-1234-5678.
-PHONE_REGEX = re.compile(r'\b03\D\d{4}\D\d{4}\b')
-
-
-def filter_digits(string):
-	"""Filtre la chaine en entrée pour ne garder que les chiffres."""
-	return ''.join(filter(str.isdigit, string))
+# 登録番号 inscrit sur le reçu. Il est de la forme T0123456789.
+REGISTRATION_REGEX = re.compile(r'\bT\d{13}\b')
 
 
 def load_stores():
 	"""
-	Charge la base des magasins connus sous forme de dict { téléphone:
-	(catégorie, nom) }. Le numéro de téléphone est écrit sous la forme
-	d’une série de chiffres et rien de plus.
+	Charge la base des magasins connus sous forme de dict { inscription:
+	(catégorie, nom) }. Le numéro d’inscription est le la forme
+	T0123456789.
 	"""
 	stores = {}
 	with open('stores.tsv', newline='') as data:
 		for row in csv.reader(data, dialect='excel-tab'):
-			phone = filter_digits(row[0])
-			stores[phone] = (row[1], row[2])
+			stores[row[0]] = (row[1], row[2])
 	return stores
 
 
@@ -51,12 +44,11 @@ def parse_receipt(text):
 		data['date'] = '%d-%02d-%02d' % (int(m[1]), int(m[2]), int(m[3]))
 
 	if m := re.search(TOTAL_REGEX, text):
-		data['amount'] = int(filter_digits(m[1]))
+		data['amount'] = int(''.join(filter(str.isdigit, m[1])))
 
-	if m := re.search(PHONE_REGEX, text):
-		phone = filter_digits(m[0])
-		data['phone'] = phone
-		if store := STORES.get(phone):
+	if m := re.search(REGISTRATION_REGEX, text):
+		data['registration'] = m[0]
+		if store := STORES.get(m[0]):
 			data['category'], data['remark'] = store
 
 	return data or None
