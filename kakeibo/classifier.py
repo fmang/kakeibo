@@ -52,7 +52,7 @@ def train(test_ratio=0):
 	label_encoder, x_train, y_train = load_data()
 	if test_ratio != 0:
 		x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x_train, y_train, test_size=test_ratio)
-	classifier = sklearn.svm.SVC(gamma=0.05)
+	classifier = sklearn.svm.SVC()
 	classifier.fit(x_train, y_train)
 	if test_ratio != 0:
 		predicted = classifier.predict(x_test)
