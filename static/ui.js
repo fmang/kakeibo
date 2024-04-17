@@ -33,11 +33,6 @@ takePictureButton.onclick = () => {
 
 const receiptQueue = [];
 
-function updateQueueCounter() {
-	queueCounter.innerText = `あと ${receiptQueue.length} 枚`;
-	queueCounter.style.display = (receiptQueue.length == 0) ? 'none' : 'inline';
-}
-
 uploadForm.onsubmit = (event) => {
 	event.preventDefault();
 	selectPictureButton.disabled = true;
@@ -55,9 +50,7 @@ uploadForm.onsubmit = (event) => {
 	}).then((json) => {
 		for (const receipt of json.receipts)
 			receiptQueue.push(receipt);
-		updateQueueCounter();
-		if (!entry.amount.value)
-			popReceipt();
+		popReceipt();
 	}).catch((error) => {
 		alert(error.message);
 	}).finally(() => {
@@ -68,8 +61,12 @@ uploadForm.onsubmit = (event) => {
 
 function popReceipt() {
 	const receipt = receiptQueue.shift();
-	if (!receipt)
+	if (!receipt) {
+		clearEntryButton.style.display = "inline-flex";
+		discardEntryButton.style.display = "none";
+		queueCounter.style.display = "none";
 		return false;
+	}
 
 	entry.date.value = receipt.date;
 	entry.amount.value = receipt.amount;
@@ -78,7 +75,11 @@ function popReceipt() {
 	if (receipt.category)
 		entry.category.value = receipt.category;
 
-	updateQueueCounter();
+	clearEntryButton.style.display = "none";
+	discardEntryButton.style.display = "inline-flex";
+	queueCounter.innerText = `あと ${receiptQueue.length} 枚`;
+	queueCounter.style.display = "inline";
+
 	return true;
 }
 
@@ -98,10 +99,15 @@ function today() {
 	return new Date().toISOString().split("T")[0];
 }
 
-entry.onreset = () => {
+entry.onreset = (event) => {
 	entry.date.defaultValue = today();
-	entry.amount.focus();
+	entry.registration.value = null;
+	if (popReceipt())
+		event.preventDefault();
+	else
+		entry.amount.focus();
 };
+
 entry.reset();
 
 // Quand l’application est réouverte, on focus le prix car c’est là que tout

@@ -42,7 +42,7 @@ button:hover {
 
 button.icon {
 	display: inline-flex;
-	align-self: center;
+	align-items: center;
 	border-radius: 500px;
 }
 
@@ -112,6 +112,7 @@ button:disabled {
 .actions {
 	display: flex;
 	justify-content: space-evenly;
+	align-items: center;
 	gap: 1em;
 }
 
