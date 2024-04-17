@@ -142,6 +142,7 @@ def download(user: str = Depends(authenticate)):
 	report_path = f"downloads/{report_name}"
 	with open(report_path, 'w', newline='') as report:
 		writer = csv.writer(report, dialect='excel-tab')
+		writer.writerow(('日付', '部類', 'リク', 'あん', '備考'))
 		for entry in sorted(entries.values()):
 			writer.writerow(entry)
 
