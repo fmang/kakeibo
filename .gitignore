@@ -11,4 +11,5 @@ __pycache__
 /uploads
 /api-keys
 /receipt-scanner
-t/*.jpg
+/stores.tsv
+/t/*.jpg
