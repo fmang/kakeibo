@@ -73,12 +73,25 @@ function popReceipt() {
 
 	entry.date.value = receipt.date;
 	entry.amount.value = receipt.amount;
-	entry.remark.value = receipt.remark || '';
+	entry.remark.value = receipt.remark || null;
+	entry.registration.value = receipt.registration || null;
 	if (receipt.category)
 		entry.category.value = receipt.category;
 
 	updateQueueCounter();
 	return true;
+}
+
+// Si on reçoit plusieurs reçus avec le même numéro d’inscription, et que le
+// premier est sauvegardé avec une catégorie et une remarque, on associe cette
+// catégorie et remarque à tous les autres reçus en attente.
+function updateReceiptsStore(registration, category, remark) {
+	for (const receipt of receiptQueue) {
+		if (receipt.registration == registration) {
+			receipt.category = category;
+			receipt.remark = remark;
+		}
+	}
 }
 
 function today() {
@@ -152,10 +165,19 @@ entry.onsubmit = () => {
 		data.id = json['id'];
 		new HistoryEntry(data);
 		flyPlane();
+
+		// Partage le magasin avec les autres reçus de la file.
+		if (entry.registration.value)
+			updateReceiptsStore(entry.registration.value,
+			                    entry.category.value,
+			                    entry.remark.value);
+
 		// Réinitialise seulement partiellement le formulaire pour
 		// faciliter l’ajout de reçus similaires.
 		entry.amount.value = null;
 		entry.remark.value = null;
+		entry.registration.value = null;
+
 		if (!popReceipt())
 			entry.amount.focus();
 	}).catch((error) => {

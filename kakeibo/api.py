@@ -49,15 +49,11 @@ class Entry(BaseModel):
 	anju: int | None
 	remark: str
 	category: str
+	registration: str
 
 
 class Withdrawal(BaseModel):
 	id: int
-
-
-@api.get('/ping')
-def ping():
-	return 'OK'
 
 
 last_id = 0
@@ -77,6 +73,7 @@ def log_entry(*row):
 
 @api.post('/send')
 def send(entry: Entry, user: str = Depends(authenticate)):
+	"""Enregistre la transaction dans le journal des opérations."""
 	id = generate_id()
 	log_entry(
 		entry.date.isoformat(),
@@ -88,6 +85,9 @@ def send(entry: Entry, user: str = Depends(authenticate)):
 		datetime.now().isoformat(timespec='seconds'),
 		user,
 	)
+
+	if entry.registration:
+		kakeibo.receipt.remember_store(entry.registration, entry.category, entry.remark)
 
 	return { 'id': id }
 

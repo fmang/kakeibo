@@ -34,7 +34,24 @@ def load_stores():
 	return stores
 
 
+# Charge à l’initialisation la liste des magasins connus. Cette liste est mise
+# à jour à chaque fois que l’API enregistre un nouveau magasin.
 STORES = load_stores()
+
+
+def remember_store(registration, category, name):
+	"""
+	Ajoute le magasin au fichier stores.csv, à moins qu’il soit déjà connu
+	avec les mêmes propriétés.
+	"""
+	if STORES.get(registration) == (category, name):
+		return
+
+	with open('stores.tsv', 'a', newline='') as data:
+		writer = csv.writer(data, dialect='excel-tab')
+		writer.writerow((registration, category, name))
+
+	STORES[registration] = (category, name)
 
 
 def parse_receipt(text):
