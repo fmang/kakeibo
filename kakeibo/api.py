@@ -7,7 +7,7 @@ import time
 from datetime import date, datetime
 from fastapi import FastAPI, UploadFile, Depends, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import APIKeyQuery
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Annotated
@@ -32,12 +32,11 @@ def load_api_keys():
 
 
 API_KEYS = load_api_keys()
-security = HTTPBearer()
 
 
-def authenticate(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> str:
+def authenticate(api_key: str = Depends(APIKeyQuery(name="key"))) -> str:
 	"""Authentifie et renvoie l’utilisateur connecté."""
-	if user := API_KEYS.get(credentials.credentials):
+	if user := API_KEYS.get(api_key):
 		return user
 	else:
 		raise HTTPException(401)

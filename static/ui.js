@@ -147,9 +147,8 @@ uploadForm.onsubmit = (event) => {
 	selectPictureButton.disabled = true;
 	takePictureButton.disabled = true;
 
-	fetch("api/upload", {
+	fetch(`api/upload?key=${api_key}`, {
 		method: "POST",
-		headers: { 'Authorization': `Bearer ${api_key}` },
 		body: new FormData(uploadForm),
 	}).then((response) => {
 		if (response.ok)
@@ -250,12 +249,9 @@ class HistoryEntry {
 	withdraw() {
 		this.#withdrawButton.disabled = true;
 
-		fetch("api/withdraw", {
+		fetch(`api/withdraw?key=${api_key}`, {
 			method: "POST",
-			headers: {
-				'Authorization': `Bearer ${api_key}`,
-				"Content-Type": "application/json",
-			},
+			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ id: this.data.id }),
 		}).then((response) => {
 			if (response.ok)
@@ -317,12 +313,9 @@ entry.onsubmit = () => {
 	const data = buildEntryData();
 	submitEntryButton.disabled = true;
 
-	fetch("api/send", {
+	fetch(`api/send?key=${api_key}`, {
 		method: "POST",
-		headers: {
-			'Authorization': `Bearer ${api_key}`,
-			"Content-Type": "application/json",
-		},
+		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(data),
 	}).then((response) => {
 		if (response.ok)
