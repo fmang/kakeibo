@@ -1,3 +1,15 @@
+/*
+ * Disposition
+ * -----------
+ *
+ * L’application est conçue pour petits écrans, donc même sur PC on limite la
+ * largeure. Les marges aussi doivent être modérées. Le contenu est limité,
+ * donc la police est grande.
+ *
+ * L’en-tête partage le h1 et les boutons d’actions globales, d’où la flexbox.
+ *
+ */
+
 body {
 	font-size: 18px;
 	font-family: sans-serif;
@@ -12,19 +24,21 @@ header {
 	align-items: center;
 	margin: 0 0.5em;
 }
+
 header h1 {
 	flex-grow: 1;
 	margin: 0;
 }
 
-form table {
-	width: 100%;
-	border-spacing: 0.5em;
-}
-
-form th { white-space: nowrap; }
-form td:has(> input) { display: flex; gap: 0.5em; }
-form td > input { flex-grow: 1; }
+/*
+ * Boutons
+ * -------
+ *
+ * Pour que l’application soit conviviable sur écran tactile, on veut que les
+ * boutons soient gros et ronds. Comme le gris est moche, on personnalise aussi
+ * les couleurs.
+ *
+ */
 
 input, button {
 	font-size: 1em;
@@ -46,8 +60,13 @@ button.icon {
 	border-radius: 500px;
 }
 
-button.icon svg { height: 1.5em; }
-button.icon span { padding: 0.1em 0.2em; }
+button.icon svg {
+	height: 1.5em;
+}
+
+button.icon span {
+	padding: 0.1em 0.2em;
+}
 
 button.primary {
 	background-color: forestgreen;
@@ -59,15 +78,40 @@ button.primary:hover:not(:disabled) {
 	background-color: darkgreen;
 }
 
-button.loading {
-	background-color: darkblue;
-	fill: white;
-}
-
 button:disabled {
 	background-color: gainsboro;
 	color: gray;
 	fill: gray;
+}
+
+/*
+ * Formulaires
+ * -----------
+ *
+ * Le style des tables est partagé avec l’historique.
+ *
+ * Les catégories apparaissent tant sur le formulaire principal que sur la
+ * modale des factures. L’enfant direct de .categories peut être tant des
+ * labels avec un bouton radio que des boutons.
+ *
+ */
+
+table {
+	width: 100%;
+	border-spacing: 0.5em;
+}
+
+th, td {
+	white-space: nowrap;
+}
+
+#entry td:has(> input) {
+	display: flex;
+	gap: 0.5em;
+}
+
+#entry td > input {
+	flex-grow: 1;
 }
 
 .categories {
@@ -100,9 +144,13 @@ button:disabled {
 	font-weight: bold;
 }
 
-.categories .expense { background-color: antiquewhite; }
-.categories .income { background-color: lavender; }
-.categories .transfer { background-color: lavender; }
+.categories .expense {
+	background-color: antiquewhite;
+}
+
+.categories .income, .categories .transfer {
+	background-color: lavender;
+}
 
 .actions {
 	display: flex;
@@ -111,31 +159,35 @@ button:disabled {
 	gap: 1em;
 }
 
+/*
+ * Modales
+ * -------
+ */
+
 dialog h2 {
 	text-align: center;
 	margin: 0;
 }
 
-#historyDialog table {
+#historyTable table {
 	margin: 0.5em 0;
-	width: 100%;
 }
 
-#historyDialog table:empty::after {
+#historyTable table:empty::after {
 	content: "空";
 	display: block;
 	color: gray;
 	text-align: center;
 }
 
-#historyDialog td {
-	padding: 0.2em 0.5em;
-	white-space: nowrap;
+#historyTable .withdrawn {
+	color: gray;
 }
 
-tr.withdrawn { color: gray; }
-td.loading { color: darkblue; }
-td.success { color: darkgreen; }
+/*
+ * Avion
+ * -----
+ */
 
 #openHistoryButton, #submitEntryButton {
 	z-index: 2;
