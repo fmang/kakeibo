@@ -1,8 +1,33 @@
+"""
+API web du projet kakeibo. Toute la partie dynamique est montée sous /api/,
+tandis que le reste provient du dossier static/. On ne génère pas de HTML en
+back-end, donc tout le dynamisme est géré par JavaScript.
+
+Le fichier principal est log.tsv qui contient les colonnes suivantes :
+
+1. La date de l’opération au format ISO 8601.
+2. La catégorie de l’opération (quotidien, facture, …).
+3. Le montant pour リク, négatif si c’est une dépense et positif pour un gain.
+4. Le montant pour あん, suivant la même convention.
+5. Un commentaire. Habituellement, le nom du magasin.
+6. L’ID de l’opération.
+7. La date de l’enregistrement.
+8. L’auteur de l’opération.
+
+Les 5 premiers champs proviennent du tableur utilisé historiquement, et
+représente le cœur du journal. Les 3 autres champs sont des métadonnées d’API.
+Si plusieurs lignes ont le même ID, seule la dernière est prise en compte.
+
+Le journal est en append-only. Pour changer une opération, il faut en émettre
+une nouvelle avec le même ID. Pour supprimer une opération, il faut générer une
+ligne avec les 5 premiers champs vides et l’ID de l’opération à supprimer.
+"""
+
 import csv
-import uvicorn
 import os
 import shutil
 import time
+import uvicorn
 
 from datetime import date, datetime
 from fastapi import FastAPI, UploadFile, Depends, HTTPException
@@ -10,7 +35,6 @@ from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.security import APIKeyQuery
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Annotated
 
 import kakeibo.receipt
 
@@ -21,6 +45,24 @@ app.mount('/api', api)
 app.mount('/', StaticFiles(directory='static', html=True))
 
 
+last_id = 0
+
+def generate_id():
+	"""
+	Renvoie un ID unique. Pour ne pas se prendre la tête, on utilise la
+	date courante. Si plusieurs opérations sont générées à la même seconde,
+	on incrémente le dernier ID. Ça suppose qu’on ne redémarre pour trop
+	vite l’application après une série d’insertions.
+	"""
+	global last_id
+	id = max(int(time.time()), last_id + 1)
+	last_id = id
+	return id
+
+
+# Authentification
+# ----------------
+
 def load_api_keys():
 	"""
 	Les clés d’API autorisées sont listées dans le fichier api-keys à la
@@ -30,9 +72,7 @@ def load_api_keys():
 	with open('api-keys') as db:
 		return { fields[0] : fields[1] for line in db if (fields := line.split()) }
 
-
 API_KEYS = load_api_keys()
-
 
 def authenticate(api_key: str = Depends(APIKeyQuery(name="key"))) -> str:
 	"""Authentifie et renvoie l’utilisateur connecté."""
@@ -42,6 +82,16 @@ def authenticate(api_key: str = Depends(APIKeyQuery(name="key"))) -> str:
 		raise HTTPException(401)
 
 
+# Journal
+# -------
+
+def log_entry(*row):
+	"""Ajoute une entrée au journal."""
+	with open('log.tsv', 'a', newline='') as log:
+		writer = csv.writer(log, dialect='excel-tab')
+		writer.writerow(row)
+
+
 class Entry(BaseModel):
 	date: date
 	riku: int | None
@@ -49,26 +99,6 @@ class Entry(BaseModel):
 	remark: str
 	category: str
 	registration: str
-
-
-class Withdrawal(BaseModel):
-	id: int
-
-
-last_id = 0
-
-def generate_id():
-	global last_id
-	id = max(int(time.time()), last_id + 1)
-	last_id = id
-	return id
-
-
-def log_entry(*row):
-	with open('log.tsv', 'a', newline='') as log:
-		writer = csv.writer(log, dialect='excel-tab')
-		writer.writerow(row)
-
 
 @api.post('/send')
 def send(entry: Entry, user: str = Depends(authenticate)):
@@ -84,12 +114,13 @@ def send(entry: Entry, user: str = Depends(authenticate)):
 		datetime.now().isoformat(timespec='seconds'),
 		user,
 	)
-
 	if entry.registration:
 		kakeibo.receipt.remember_store(entry.registration, entry.category, entry.remark)
-
 	return { 'id': id }
 
+
+class Withdrawal(BaseModel):
+	id: int
 
 @api.post('/withdraw')
 def withdraw(withdrawal: Withdrawal, user: str = Depends(authenticate)):
@@ -107,9 +138,11 @@ def withdraw(withdrawal: Withdrawal, user: str = Depends(authenticate)):
 		datetime.now().isoformat(timespec='seconds'),
 		user,
 	)
-
 	return {}
 
+
+# Export
+# ------
 
 @api.get('/download')
 def download(user: str = Depends(authenticate)):
@@ -149,16 +182,29 @@ def download(user: str = Depends(authenticate)):
 	return FileResponse(report_path, filename=report_name)
 
 
+# Téléversement de photos
+# -----------------------
+
 @api.post('/upload')
 def upload(picture: UploadFile, user: str = Depends(authenticate)):
+	"""
+	Reçoit une photo et appelle le moteur de lecture de reçus. Renvoie la
+	liste des reçus lus en JSON. On garde la photo pour archive dans le
+	dossier uploads/, afin d’améliorer le moteur.
+	"""
 	os.makedirs('uploads', exist_ok=True)
 	destination = f"uploads/{generate_id()}"
 	with open(destination, "wb") as output:
 		shutil.copyfileobj(picture.file, output)
 	picture.file.close()
-
 	return { 'receipts': kakeibo.receipt.scan_pictures(destination) }
 
+
+# Fonction principale
+# -------------------
+#
+# Appelé avec `python -m kakeibo.api`, on lance un mini-serveur HTTP.
+#
 
 if __name__ == '__main__':
 	ssl_options = {}
