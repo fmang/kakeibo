@@ -6,7 +6,7 @@
 
 <header>
 	<h1>家計簿</h1>
-	<button id="openHistoryButton" class="icon" title="履歴">
+	<button id="openHistoryButton" class="icon" title="履歴" onclick="historyDialog.showModal()">
 		<svg viewBox="0 0 24 24">
 			<!-- Material Design: history -->
 			<path d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
@@ -31,13 +31,12 @@
 </form>
 
 <form id="entry">
-	<input type="hidden" name="registration" />
 	<table>
 		<tr>
 		<th>日付</th>
 		<td>
 			<input type="date" name="date" required />
-			<button type="button" onclick="this.form.date.value = today()">今日</button>
+			<button type="button" onclick="entry.date.value = today()">今日</button>
 		</td>
 
 		<tr>
@@ -48,12 +47,16 @@
 		<th>備考</th>
 		<td><input type="text" name="remark" /></td>
 
+		<tr style="display:none">
+		<th>登録番号</th>
+		<td><input type="text" name="registration" placeholder="T1234567890123" /></td>
+
 		<tr>
 		<td colspan="2">
 			<div class="categories">
 				<label class="expense"><input type="radio" name="category" value="日常" checked>日常</label>
 				<label class="expense"><input type="radio" name="category" value="道楽">道楽</label>
-				<label class="expense"><input type="radio" name="category" onchange="billDialog.showModal()" value="月額">月額</label>
+				<label class="expense"><input type="radio" name="category" onchange="if (!entry.remark.value) billDialog.showModal()" value="月額">月額</label>
 				<label class="expense"><input type="radio" name="category" onchange="if (!entry.remark.value) entry.remark.focus()" value="その他">その他</label>
 			</div>
 			<div class="categories">
@@ -72,7 +75,7 @@
 			</svg>
 			<span>消去</span>
 		</button>
-		<button type="reset" id="discardEntryButton" style="display: none;" class="icon">
+		<button type="reset" id="discardEntryButton" style="display: none;" class="icon" onclick="return !shiftReceipt()">
 			<svg viewBox="0 0 24 24">
 				<!-- Material Design: delete -->
 				<path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
@@ -92,7 +95,7 @@
 
 <dialog id="billDialog">
 	<h2>月額</h2>
-	<form name="bill">
+	<form id="bill">
 		<div class="categories">
 			<input type="submit" name="target" class="expense" value="家賃" />
 			<input type="submit" name="target" class="expense" value="電気" />
