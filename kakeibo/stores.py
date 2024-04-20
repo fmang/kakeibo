@@ -9,42 +9,35 @@ contiennent notamment le numéro d’inscription et le nom de l’entité.
 <https://www.invoice-kohyo.nta.go.jp/download/zenken>
 
 `python -m kakeibo.stores *.csv` permet de bâtir la base de données de données
-officielles à partir des CSV du gouvernement.
+officielles à partir des CSV du gouvernement. Seuls les 法人 sont supportés.
 """
 
+import dbm
 import csv
 import re
-import sqlite3
 import sys
 
-database = sqlite3.connect("stores.db", isolation_level=None)
-
-# Décrit les indications de statut des entreprises, qu’on voudra effacer.
-COMPANY_PREFIX = re.compile(r"(株式|有限)会社")
+database = dbm.open("stores", "c")
 
 
 def fetch(registration):
-	pass
+	"""Renvoie le nom d’un magasin à partir de son numéro d’enregistrement."""
+	try:
+		return database[registration].decode()
+	except KeyError:
+		return registration
 
 
-def load(files):
+def load(file):
 	"""Reçoit une liste de noms de fichiers CSV et les charges dans stores.db."""
-	database.execute("""
-		CREATE TABLE IF NOT EXISTS stores (
-			registration TEXT PRIMARY KEY,
-			name TEXT
-		)
-	""")
-
-	for f in files:
-		batch = []
-		with open(f, newline='') as input:
-			for row in csv.reader(input):
-				registration = row[1]
-				name = re.sub(COMPANY_PREFIX, "", row[18])
-				batch.append((registration, name))
-		database.executemany("INSERT OR REPLACE INTO stores (registration, name) VALUES (?, ?)", batch)
+	with open(file, newline='') as input:
+		for row in csv.reader(input):
+			registration = row[1]
+			name = row[18].replace("株式会社", "").replace("有限会社", "")
+			if name:
+				database[registration] = name
 
 
 if __name__ == "__main__":
-	load(sys.argv[1:])
+	for file in sys.argv[1:]:
+		load(file)
