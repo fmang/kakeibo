@@ -45,19 +45,26 @@ app.mount('/api', api)
 app.mount('/', StaticFiles(directory='static', html=True))
 
 
-last_id = 0
+last_id_timestamp = None
+last_id_counter = None
 
 def generate_id():
 	"""
-	Renvoie un ID unique. Pour ne pas se prendre la tête, on utilise la
-	date courante. Si plusieurs opérations sont générées à la même seconde,
-	on incrémente le dernier ID. Ça suppose qu’on ne redémarre pour trop
-	vite l’application après une série d’insertions.
+	Renvoie un ID unique. Pour ne pas se prendre la tête, on utilise
+	l’heure Unix courante. Si plusieurs opérations sont générées à la même
+	seconde, on ajoute un suffixe `+n`. Il ne faudra juste pas faire une
+	opération, redemarrer l’application puis faire une autre opération,
+	tout ça dans la même seconde.
 	"""
-	global last_id
-	id = max(int(time.time()), last_id + 1)
-	last_id = id
-	return id
+	global last_id_timestamp, last_id_counter
+	now = int(time.time())
+	if now == last_id_timestamp:
+		last_id_counter += 1
+		return f"{now}+{last_id_counter}"
+	else:
+		last_id_timestamp = now
+		last_id_counter = 0
+		return str(now)
 
 
 # Authentification
