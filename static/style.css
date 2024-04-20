@@ -169,11 +169,11 @@ dialog h2 {
 	margin: 0;
 }
 
-#historyTable table {
+#historyTable {
 	margin: 0.5em 0;
 }
 
-#historyTable table:empty::after {
+#historyTable:empty::after {
 	content: "空";
 	display: block;
 	color: gray;
