@@ -2,25 +2,6 @@
 API web du projet kakeibo. Toute la partie dynamique est montée sous /api/,
 tandis que le reste provient du dossier static/. On ne génère pas de HTML en
 back-end, donc tout le dynamisme est géré par JavaScript.
-
-Le fichier principal est log.tsv qui contient les colonnes suivantes :
-
-1. La date de l’opération au format ISO 8601.
-2. La catégorie de l’opération (quotidien, facture, …).
-3. Le montant pour リク, négatif si c’est une dépense et positif pour un gain.
-4. Le montant pour あん, suivant la même convention.
-5. Un commentaire. Habituellement, le nom du magasin.
-6. L’ID de l’opération.
-7. La date de l’enregistrement.
-8. L’auteur de l’opération.
-
-Les 5 premiers champs proviennent du tableur utilisé historiquement, et
-représente le cœur du journal. Les 3 autres champs sont des métadonnées d’API.
-Si plusieurs lignes ont le même ID, seule la dernière est prise en compte.
-
-Le journal est en append-only. Pour changer une opération, il faut en émettre
-une nouvelle avec le même ID. Pour supprimer une opération, il faut générer une
-ligne avec les 5 premiers champs vides et l’ID de l’opération à supprimer.
 """
 
 import csv
@@ -36,6 +17,7 @@ from fastapi.security import APIKeyQuery
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import kakeibo.book
 import kakeibo.receipt
 
 api = FastAPI()
@@ -92,13 +74,6 @@ def authenticate(api_key: str = Depends(APIKeyQuery(name="key"))) -> str:
 # Journal
 # -------
 
-def log_entry(*row):
-	"""Ajoute une entrée au journal."""
-	with open('log.tsv', 'a', newline='') as log:
-		writer = csv.writer(log, dialect='excel-tab')
-		writer.writerow(row)
-
-
 class Entry(BaseModel):
 	date: date
 	riku: int | None
@@ -111,7 +86,7 @@ class Entry(BaseModel):
 def send(entry: Entry, user: str = Depends(authenticate)):
 	"""Enregistre la transaction dans le journal des opérations."""
 	id = generate_id()
-	log_entry(
+	kakeibo.book.log(
 		entry.date.isoformat(),
 		entry.category,
 		entry.riku,
@@ -135,7 +110,7 @@ def withdraw(withdrawal: Withdrawal, user: str = Depends(authenticate)):
 	Ajoute une ligne avec tous les champs vide sauf l’ID et les métadonnées
 	API pour marquer la pierre tombale.
 	"""
-	log_entry(
+	kakeibo.book.log(
 		None,
 		None,
 		None,
@@ -159,33 +134,11 @@ def download(user: str = Depends(authenticate)):
 	dernière l’emporte. Le fichier généré est ensuite archivé dans
 	downloads/ puis on propose à l’utilisateur de le télécharger.
 	"""
-	entries = {}
-	with open('log.tsv', newline='') as log:
-		reader = csv.reader(log, dialect='excel-tab')
-		for index, row in enumerate(reader, start=1):
-			# Quand une ligne n’a pas d’ID, on lui en génère un
-			# artificiel. Il doit être unique et ne pas faire
-			# conflit avec les vrais ID.
-			id = row[5] if len(row) >= 6 else -index
-
-			# Le journal modélise la suppression en ajoutant une
-			# ligne avec les 5 premières colonnes vides, puis l’ID
-			# de la ligne à supprimer.
-			gist = row[0:5]
-			if any(gist):
-				entries[id] = gist
-			else:
-				del entries[id]
-
 	os.makedirs('downloads', exist_ok=True)
 	report_name = f"kakeibo-{date.today().isoformat()}.tsv"
 	report_path = f"downloads/{report_name}"
 	with open(report_path, 'w', newline='') as report:
-		writer = csv.writer(report, dialect='excel-tab')
-		writer.writerow(('日付', '部類', 'リク', 'あん', '備考'))
-		for entry in sorted(entries.values()):
-			writer.writerow(entry)
-
+		kakeibo.book.export_tsv(report)
 	return FileResponse(report_path, filename=report_name)
 
 
