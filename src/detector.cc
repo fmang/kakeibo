@@ -206,6 +206,8 @@ static cv::Mat binarize(cv::Mat color)
 	cv::extractChannel(color, binary, 2); // Canal rouge.
 	cv::bitwise_not(binary, binary); // Blanc sur noir.
 	cv::adaptiveThreshold(binary, binary, 255, cv::THRESH_BINARY, cv::ADAPTIVE_THRESH_MEAN_C, 75, -30);
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
+	cv::morphologyEx(binary, binary, cv::MORPH_OPEN, element);
 	return binary;
 }
 
