@@ -230,6 +230,8 @@ function historize_entry(data) {
 
 	const id = data.id;
 	slots.withdraw.onclick = function (event) {
+		if (!confirm("本当に取り消しますか？"))
+			return false;
 		this.disabled = true;
 		fetch(`api/withdraw?key=${api_key}`, {
 			method: "POST",
