@@ -23,7 +23,9 @@ Après déduplication des lignes vides, et en supprimant les données API, on
 obtient le livre de compte final.
 """
 
+import argparse
 import csv
+import datetime
 import sys
 
 
@@ -70,5 +72,69 @@ def export_tsv(output):
 		writer.writerow(entry)
 
 
+def check_duplicates(book):
+	"""
+	Affiche un message quuand on détecte un doublon. L’entrée est déjà
+	triée, donc il suffit de vérifier que deux lignes consécutives sont
+	toujours différentes.
+	"""
+	previous_row = None
+	for current_row in book:
+		if current_row == previous_row:
+			print("Doublon :", *current_row)
+		previous_row = current_row
+
+
+def check_bills(book):
+	"""
+	Valide que les factures mensuelles sont bien payées tous les mois, et
+	qu’il n’y pas de trou trop grand.
+	"""
+	bills = {} # name: [first_date, last_date, count]
+	for row in book:
+		date, category, _, _, name = row
+		date = datetime.date.fromisoformat(date)
+		if category != "月額":
+			continue
+		elif not name:
+			print("Facture inconnue :", *row)
+		elif bill := bills.get(name):
+			# On laisse 2 semaines de marges pour les factures manuelles.
+			if date - bill[1] > datetime.timedelta(days=45):
+				print(f"La facture {name} n’a aucun paiement entre {bill[1]} et {date}.")
+			bill[1] = date
+			bill[2] += 1
+		else:
+			bills[name] = [date, date, 1]
+
+	for name, (first_date, last_date, count) in bills.items():
+		year_difference = last_date.year - first_date.year
+		month_difference = last_date.month - first_date.month
+		# Nombre de mois impactés. Entre le 1er janvier et le 1er mars, on considère qu’on a 3 mois.
+		month_span = year_difference * 12 + month_difference + 1
+		# Dans le cas serré, on peut avoir un paiement le 1er et le 30, soit 2 sur 1 mois.
+		# Inversement, on peut avoir un paiement le 30 janvier et le 1er mars, soit 2 sur 3 mois.
+		if count < month_span - 1 or count > month_span + 1:
+			print(f"La facture {name} a {count} paiements au lieu de {month_span} entre {first_date} et {last_date}.")
+
+
+def validate():
+	"""Compile et valide que le livre ne contient pas de données louches."""
+	book = compile()
+	check_duplicates(book)
+	check_bills(book)
+
+
+def parse_args():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--validate', action='store_true')
+	args = parser.parse_args()
+	return args
+
+
 if __name__ == "__main__":
-	export_tsv(sys.stdout)
+	args = parse_args()
+	if args.validate:
+		validate()
+	else:
+		export_tsv(sys.stdout)
