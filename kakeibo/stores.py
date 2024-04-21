@@ -32,7 +32,7 @@ def load_custom():
 	stores = {}
 	try:
 		with open('stores.tsv', newline='') as data:
-			for row in csv.reader(data, dialect='excel-tab'):
+			for row in csv.reader(data, dialect='tsv'):
 				stores[row[0]] = (row[1], row[2])
 	except FileNotFoundError:
 		pass
@@ -52,7 +52,7 @@ def remember(registration, category, name):
 		return
 
 	with open('stores.tsv', 'a', newline='') as data:
-		writer = csv.writer(data, dialect='excel-tab')
+		writer = csv.writer(data, dialect='tsv')
 		writer.writerow((registration, category, name))
 
 	CUSTOM_DATABASE[registration] = (category, name)

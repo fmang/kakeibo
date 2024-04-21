@@ -30,7 +30,7 @@ import sys
 def log(*row):
 	"""Ajoute une entrée au journal."""
 	with open('log.tsv', 'a', newline='') as log:
-		writer = csv.writer(log, dialect='excel-tab')
+		writer = csv.writer(log, dialect='tsv')
 		writer.writerow(row)
 
 
@@ -43,7 +43,7 @@ def compile():
 	entries = [] # Liste de quintuplets pour le livre compilé.
 	api_entries = {} # Association { ID: quintuplet } pour la déduplication.
 	with open('log.tsv', newline='') as log:
-		for row in csv.reader(log, dialect='excel-tab'):
+		for row in csv.reader(log, dialect='tsv'):
 			gist = row[0:5]
 			if len(row) > 5 and (id := row[5]):
 				if any(gist):
@@ -64,7 +64,7 @@ def compile():
 
 def export_tsv(output):
 	"""Exporte le livre compilé au format TSV."""
-	writer = csv.writer(output, dialect='excel-tab')
+	writer = csv.writer(output, dialect='tsv')
 	writer.writerow(('日付', '部類', 'リク', 'あん', '備考'))
 	for entry in compile():
 		writer.writerow(entry)
