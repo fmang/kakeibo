@@ -27,11 +27,10 @@ import kakeibo.stores
 
 DATE_REGEX = re.compile(r'\b(20\d\d)\D([01]?\d)\D([0123]?\d)\b')
 
-# 言偏 est un peu difficile à lire par sa complexité, mais il est peu probable
-# qu’on se trouve sur le +, ou qu’une autre lettre vienne s’intercaler.
-TOTAL_REGEX = re.compile(r'^合(?:計|言十|�十).*￥(\d+(?:\D?\d{3})*)$', re.MULTILINE)
+# Le total est identifé par la ligne qui commence par 合.
+TOTAL_REGEX = re.compile(r'^合.*￥(\d+(?:\D?\d{3})*)$', re.MULTILINE)
 
-# 登録番号 inscrit sur le reçu. Il est de la forme T0123456789.
+# 登録番号 inscrit sur le reçu. Il est de la forme T0123456789123.
 REGISTRATION_REGEX = re.compile(r'\bT\d{13}\b')
 
 
