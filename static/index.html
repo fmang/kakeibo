@@ -120,6 +120,15 @@
 <dialog id="historyDialog">
 	<h2>履歴</h2>
 	<table id="historyTable"></table>
+	<template id="historyRow">
+		<tr>
+		<td style="font-size: 0.7em;">
+			<slot name="date"></slot><br />
+			<slot name="category"></slot>　<slot name="remark"></slot>
+		</td>
+		<td style="text-align: right;"><slot name="amount"></slot>
+		<td style="text-align: right;"><button name="withdraw">取消</button>
+	</template>
 	<form class="actions">
 		<button class="icon" formmethod="dialog">
 			<svg viewBox="0 0 24 24">

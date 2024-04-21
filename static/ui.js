@@ -216,56 +216,40 @@ function centerTo(element, reference) {
 
 const amountFormatter = Intl.NumberFormat("ja-JP", { signDisplay: "exceptZero" });
 
-class HistoryEntry {
-	#row;
-	#withdrawButton;
+function historize_entry(data) {
+	const row = historyRow.content.firstElementChild.cloneNode(true);
+	const slots = {};
+	for (const slot of row.querySelectorAll("[name]"))
+		slots[slot.name] = slot;
 
-	constructor(data) {
-		this.data = data;
+	slots.date.innerText = data.date.replace(/^\d+-0?(\d+)-0?(\d+)$/, "$1月 $2日");
+	slots.amount.innerText = amountFormatter.format(data[me]) + "円";
+	slots.category.innerText = data.category;
+	slots.remark.innerText = data.remark;
+	console.log(data);
 
-		const dateCell = document.createElement("td");
-		dateCell.style.textAlign = "right";
-		dateCell.innerText = data.date.replace(/^\d+-0?(\d+)-0?(\d+)$/, "$1月$2日");
-
-		const amountCell = document.createElement("td");
-		dateCell.style.textAlign = "right";
-		amountCell.innerText = amountFormatter.format(data[me]) + "円";
-		amountCell.title = data.category;
-
-		const actionsCell = document.createElement("td");
-		dateCell.style.textAlign = "right";
-		this.#withdrawButton = document.createElement("button");
-		this.#withdrawButton.innerText = "取消";
-		this.#withdrawButton.onclick = () => { this.withdraw(); };
-		actionsCell.appendChild(this.#withdrawButton);
-
-		this.#row = document.createElement("tr");
-		this.#row.appendChild(dateCell);
-		this.#row.appendChild(amountCell);
-		this.#row.appendChild(actionsCell);
-		historyTable.appendChild(this.#row);
-	}
-
-	withdraw() {
-		this.#withdrawButton.disabled = true;
-
+	const id = data.id;
+	slots.withdraw.onclick = function (event) {
+		this.disabled = true;
 		fetch(`api/withdraw?key=${api_key}`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ id: this.data.id }),
+			body: JSON.stringify({ id }),
 		}).then((response) => {
 			if (response.ok)
 				return response.json();
 			else
 				throw new Error("HTTP " + response.status);
 		}).then((json) => {
-			this.#row.classList.add("withdrawn");
-			this.#withdrawButton.style.visibility = "hidden";
+			row.classList.add("withdrawn");
+			this.style.visibility = "hidden";
 		}).catch((error) => {
 			alert(error.message);
-			this.#withdrawButton.disabled = false;
+			this.disabled = false;
 		})
-	}
+	};
+
+	historyTable.appendChild(row);
 }
 
 /*
@@ -324,7 +308,7 @@ entry.onsubmit = () => {
 			throw new Error("HTTP " + response.status);
 	}).then((json) => {
 		data.id = json['id'];
-		new HistoryEntry(data);
+		historize_entry(data);
 		flyPlane();
 
 		// Partage le magasin avec les autres reçus de la file.
