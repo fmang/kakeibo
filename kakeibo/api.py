@@ -91,13 +91,13 @@ def send(entry: Entry, user: str = Depends(authenticate)):
 		entry.category,
 		entry.riku,
 		entry.anju,
-		entry.remark,
+		entry.remark or entry.registration,
 		id,
 		datetime.now().isoformat(timespec='seconds'),
 		user,
 	)
 	if entry.registration:
-		kakeibo.receipt.remember_store(entry.registration, entry.category, entry.remark)
+		kakeibo.stores.remember(entry.registration, entry.category, entry.remark)
 	return { 'id': id }
 
 
