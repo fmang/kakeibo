@@ -223,7 +223,7 @@ function historize_entry(data) {
 		slots[slot.name] = slot;
 
 	slots.date.innerText = data.date.replace(/^\d+-0?(\d+)-0?(\d+)$/, "$1月 $2日");
-	slots.amount.innerText = amountFormatter.format(data[me]) + "円";
+	slots.amount.innerText = amountFormatter.format(data[me]);
 	slots.category.innerText = data.category;
 	slots.remark.innerText = data.remark;
 	console.log(data);

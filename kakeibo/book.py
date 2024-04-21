@@ -125,9 +125,25 @@ def validate():
 	check_bills(book)
 
 
+def summarize():
+	"""Parcourt le livre et donne les totaux."""
+	riku = 0
+	anju = 0
+	for row in compile():
+		riku += int(row[2] or 0)
+		anju += int(row[3] or 0)
+	print("リク : ", riku)
+	print("あん : ", anju)
+	if riku > anju:
+		print(f"リク doit {(riku - anju) // 2:,} à あん.")
+	elif anju > riku:
+		print(f"あん doit {(anju - riku) // 2:,} à リク.")
+
+
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--validate', action='store_true')
+	parser.add_argument('--summary', action='store_true')
 	args = parser.parse_args()
 	return args
 
@@ -136,5 +152,7 @@ if __name__ == "__main__":
 	args = parse_args()
 	if args.validate:
 		validate()
+	elif args.summary:
+		summarize()
 	else:
 		export_tsv(sys.stdout)
