@@ -237,9 +237,12 @@ static double evaluate_candidate(const std::vector<quad>& candidate)
 	size_t angles_count = 0;
 	for (const quad& q : candidate) {
 		for (size_t i = 0; i < 4; ++i) {
-			cv::Point a = q.corners[i];
-			cv::Point b = q.corners[(i + 1) % 4];
-			sinus_sum += a.cross(b) / cv::norm(a) / cv::norm(b);
+			cv::Point a = q.corners[(i + 3) % 4];
+			cv::Point b = q.corners[i];
+			cv::Point c = q.corners[(i + 1) % 4];
+			cv::Point u = b - a;
+			cv::Point v = c - b;
+			sinus_sum += std::abs(u.cross(v)) / cv::norm(u) / cv::norm(v);
 			++angles_count;
 		}
 	}
