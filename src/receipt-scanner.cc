@@ -1,4 +1,5 @@
 #include "kakeibo.h"
+#include "config.h"
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -194,6 +195,7 @@ void show(const std::string& name, cv::Mat image)
 	if (!explain)
 		return;
 
+#ifdef EXPLAIN
 	static std::set<std::string> skip;
 	if (skip.contains(name))
 		return;
@@ -206,4 +208,11 @@ void show(const std::string& name, cv::Mat image)
 	case 'q': explain = false; break;
 	default: skip.insert(name);
 	}
+#else
+	static bool warned = false;
+	if (!warned) {
+		std::fputs("--explain support has not been built.\n", stderr);
+		warned = true;
+	}
+#endif
 }

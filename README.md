@@ -17,6 +17,9 @@ CMake permet de compiler l’exécutable receipt-scanner, requis pour extraire l
 informations des photos de reçu. Une fois compilé, il doit être accessible
 depuis le PATH de l’application web.
 
+Pour le debug, l’option --explain peut être compilée en passant `-DEXPLAIN=1` à
+la commande cmake.
+
 Dépendances côté Python :
 
 - scikit-learn,
