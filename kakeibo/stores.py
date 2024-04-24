@@ -61,12 +61,15 @@ def remember(registration, category, name):
 # Pseudo-dict { 登録番号: nom } des magasins d’après les données du gouvernement.
 OFFICIAL_DATABASE = dbm.open("stores", "c")
 
+# Motif des indications de statut redondantes dans le nom des magasins.
+COMPANY_STATUS = re.compile(r'株式会社|有限会社|コーポレーション')
+
 def import_official(file):
 	"""Reçoit une liste de noms de fichiers CSV et les charges dans stores.db."""
 	with open(file, newline='') as input:
 		for row in csv.reader(input):
 			registration = row[1]
-			name = row[18].replace("株式会社", "").replace("有限会社", "")
+			name = row[18]
 			if name:
 				OFFICIAL_DATABASE[registration] = name
 
@@ -80,7 +83,9 @@ def fetch(registration):
 	if pair := CUSTOM_DATABASE.get(registration):
 		return pair
 	try:
-		return (None, OFFICIAL_DATABASE[registration].decode())
+		name = OFFICIAL_DATABASE[registration].decode()
+		name = re.sub(COMPANY_STATUS, '', name)
+		return (None, name)
 	except KeyError:
 		return (None, None)
 
