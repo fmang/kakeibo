@@ -85,23 +85,33 @@ def check_duplicates(book):
 		previous_row = current_row
 
 
-def check_bills(book):
+def check_monthly_operations(book):
 	"""
-	Valide que les factures mensuelles sont bien payées tous les mois, et
-	qu’il n’y pas de trou trop grand.
+	Valide que les factures mensuelles et les salaires sont bien payés tous
+	les mois, et qu’il n’y pas de paiments trop sérrés ou trop espacés.
 	"""
 	bills = {} # name: [first_date, last_date, count]
 	for row in book:
-		date, category, _, _, name = row
+		date, category, riku, anju, remark = row
 		date = datetime.date.fromisoformat(date)
-		if category != "月額":
+
+		if category == "給料":
+			name = "Salaire " + (remark if remark else "Fred" if riku else "Anju" if anju else "ø")
+		elif category == "月額":
+			if not remark:
+				print("Facture inconnue :", *row)
+				continue
+			name = "Facture " + remark
+		else:
 			continue
-		elif not name:
-			print("Facture inconnue :", *row)
-		elif bill := bills.get(name):
-			# On laisse 2 semaines de marges pour les factures manuelles.
-			if date - bill[1] > datetime.timedelta(days=45):
-				print(f"La facture {name} n’a aucun paiement entre {bill[1]} et {date}.")
+
+		if bill := bills.get(name):
+			gap = date - bill[1]
+			if gap > datetime.timedelta(days=45):
+				# On laisse 2 semaines de marges pour les factures manuelles.
+				print(f"{name} : Aucun paiement entre {bill[1]} et {date}.")
+			elif gap < datetime.timedelta(days=15):
+				print(f"{name} : Paiements rapprochés le {bill[1]} et {date}.")
 			bill[1] = date
 			bill[2] += 1
 		else:
@@ -115,14 +125,14 @@ def check_bills(book):
 		# Dans le cas serré, on peut avoir un paiement le 1er et le 30, soit 2 sur 1 mois.
 		# Inversement, on peut avoir un paiement le 30 janvier et le 1er mars, soit 2 sur 3 mois.
 		if count < month_span - 1 or count > month_span + 1:
-			print(f"La facture {name} a {count} paiements au lieu de {month_span} entre {first_date} et {last_date}.")
+			print(f"{name} : {count} paiements au lieu de {month_span} entre {first_date} et {last_date}.")
 
 
 def validate():
 	"""Compile et valide que le livre ne contient pas de données louches."""
 	book = compile()
 	check_duplicates(book)
-	check_bills(book)
+	check_monthly_operations(book)
 
 
 def summarize():
@@ -143,7 +153,7 @@ def summarize():
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--validate', action='store_true')
-	parser.add_argument('--summary', action='store_true')
+	parser.add_argument('--summarize', action='store_true')
 	args = parser.parse_args()
 	return args
 
@@ -152,7 +162,7 @@ if __name__ == "__main__":
 	args = parse_args()
 	if args.validate:
 		validate()
-	elif args.summary:
+	elif args.summarize:
 		summarize()
 	else:
 		export_tsv(sys.stdout)
