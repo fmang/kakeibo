@@ -1,8 +1,11 @@
 #include "kakeibo.h"
 #include "config.h"
 
-#include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
+
+#ifdef EXPLAIN
+#  include <opencv2/highgui.hpp>
+#endif
 
 #include <cstdio>
 #include <cstdlib>

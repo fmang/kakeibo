@@ -9,7 +9,10 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(OpenCV REQUIRED core imgproc imgcodecs highgui)
+find_package(OpenCV REQUIRED core imgproc imgcodecs)
+if (EXPLAIN)
+	find_package(OpenCV REQUIRED highgui)
+endif()
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 configure_file(src/config.h.in src/config.h)
