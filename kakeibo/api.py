@@ -93,7 +93,7 @@ def send(entry: Entry, user: str = Depends(authenticate)):
 		entry.anju,
 		entry.remark or entry.registration,
 		id,
-		datetime.now().isoformat(timespec='seconds'),
+		datetime.utcnow().isoformat(timespec='seconds') + 'Z',
 		user,
 	)
 	if entry.registration:
@@ -117,7 +117,7 @@ def withdraw(withdrawal: Withdrawal, user: str = Depends(authenticate)):
 		None,
 		None,
 		withdrawal.id,
-		datetime.now().isoformat(timespec='seconds'),
+		datetime.utcnow().isoformat(timespec='seconds') + 'Z',
 		user,
 	)
 	return {}
