@@ -85,12 +85,12 @@ function updateReceiptsStore(registration, category, remark) {
  */
 
 function today() {
-	return new Date().toISOString().split("T")[0];
+	// toISOString() prend la date UTC plutôt que le fuseau local.
+	// Le format de date suédois court s’avère coller à ISO.
+	return new Date().toLocaleString("sv", { dateStyle: "short" });
 }
 
-entry.date.value = today();
-
-let lastFocus = Date.now();
+let lastFocus = 0;
 
 window.onfocus = () => {
 	const now = Date.now();
@@ -103,6 +103,8 @@ window.onfocus = () => {
 	if (!entry.amount.value)
 		entry.amount.focus();
 };
+
+window.onfocus();
 
 // Quand le dialogue de sélection de facture est validé, on remplit le champ
 // remarque avec le type de facture choisi.
