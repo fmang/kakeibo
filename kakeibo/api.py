@@ -89,8 +89,8 @@ def send(entry: Entry, user: str = Depends(authenticate)):
 	kakeibo.book.log(
 		entry.date.isoformat(),
 		entry.category,
-		entry.riku,
-		entry.anju,
+		f"{entry.riku:+}" if entry.riku else None,
+		f"{entry.anju:+}" if entry.anju else None,
 		entry.remark or entry.registration,
 		id,
 		datetime.utcnow().isoformat(timespec='seconds') + 'Z',
