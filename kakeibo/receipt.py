@@ -13,7 +13,6 @@ image et renvoie une liste de JSON au format suivant :
 
 
 import argparse
-import importlib.resources
 import io
 import json
 import pickle
@@ -51,8 +50,7 @@ def parse_receipt(text):
 
 
 def scan_pictures(*pictures_paths):
-	model_path = importlib.resources.files('kakeibo') / 'letters.model'
-	with open(model_path, 'rb') as f:
+	with open('letters.model', 'rb') as f:
 		model = pickle.load(f)
 
 	decoded_io = io.StringIO()

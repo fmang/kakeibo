@@ -10,6 +10,7 @@ __pycache__
 /log.tsv
 /uploads
 /api-keys
+/letters.model
 /receipt-scanner
 /stores.tsv
 /stores.db

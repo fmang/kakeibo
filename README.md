@@ -34,7 +34,7 @@ Pour entrainer le modèle, remplir pour chaque lettre le dossier letters/x (où 
 est la lettre à reconnaitre) d’images de cette lettre. Ensuite, lancer la
 commande suivante :
 
-	receipt-scanner --compile letters | python -m kakeibo.classifier --train kakeibo/letters.model
+	receipt-scanner --compile letters | python -m kakeibo.classifier --train letters.model
 
 Pour détecter les magasins, se référer au module kakeibo.stores.
 
