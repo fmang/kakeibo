@@ -115,7 +115,7 @@ def send(entry: Entry, user: str = Depends(authenticate)):
 
 
 class Withdrawal(BaseModel):
-	id: int
+	id: str
 
 @api.post('/withdraw')
 def withdraw(withdrawal: Withdrawal, user: str = Depends(authenticate)):
