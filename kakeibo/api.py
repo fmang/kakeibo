@@ -26,6 +26,19 @@ app = FastAPI()
 app.mount('/api', api)
 app.mount('/', StaticFiles(directory='static', html=True))
 
+@app.middleware("http")
+async def set_cache_control(request, call_next):
+	"""
+	Les applications web progressives ne fournissent pas de bouton pour
+	rafraichir la page, donc le cache est difficile à nettoyer.
+	Désactivons-le pour éliminer ces désagréments. En temps normal,
+	l’application reste ouverte en fond, donc à moins de la fermer
+	explicitement le code n’est pas rechargé pour rien.
+	"""
+	response = await call_next(request)
+	response.headers["Cache-Control"] = "no-cache"
+	return response
+
 
 last_id_timestamp = None
 last_id_counter = None
