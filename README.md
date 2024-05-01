@@ -4,6 +4,20 @@ Kakeibo
 Ce projet vise à fournir une application web conviviale pour enregistrer les
 dépenses et les revenus de mon foyer.
 
+Installation en bref
+--------------------
+
+	mkdir build
+	cd build
+	cmake ..
+	make
+	cd ..
+	ln -s build/receipt-scanner .
+	./receipt-scanner --compile letters | python -m kakeibo.classifier --train letters.model
+	echo CLÉ riku >> api-keys
+	python -m kakeibo.api
+	firefox 'http://localhost:8443/#riku:CLÉ'
+
 Compilation
 -----------
 
@@ -14,8 +28,8 @@ Dépendances pour le scanneur de reçus :
 - OpenCV 4.
 
 CMake permet de compiler l’exécutable receipt-scanner, requis pour extraire les
-informations des photos de reçu. Une fois compilé, il doit être accessible
-depuis le PATH de l’application web.
+informations des photos de reçu. Une fois compilé, il doit être placé dans le
+dossier d’exécution de l’application web pour s’y intégrer.
 
 Pour le debug, l’option --explain peut être compilée en passant `-DEXPLAIN=1` à
 la commande cmake.
