@@ -2,7 +2,14 @@ Kakeibo
 =======
 
 Ce projet vise à fournir une application web conviviale pour enregistrer les
-dépenses et les revenus de mon foyer.
+dépenses et les revenus de mon foyer. Elle n’est pas prévue pour être
+générique, mais libre à quiconque de s’en servir comme inspiration.
+
+Le scanneur de reçus est codé en C++ avec OpenCV, et la reconnaissance des
+chiffres gérée par Python avec scikit-learn. L’API est codée en Python avec
+FastAPI. L’application web est progressive et codée en JavaScript vanille.
+
+Comme je vis au Japon, seuls les reçus en yen sont supportés.
 
 Installation en bref
 --------------------
